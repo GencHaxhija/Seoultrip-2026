@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suedkorea-Reise Dashboard</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#17202a;--muted:#65727e;--accent:#315efb;--fixed:#fff0d9;--border:#dce2e8;--danger:#d64545}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:#17202a;color:#fff;padding:26px 5vw}
+h1,h2,h3{margin:0 0 8px}
+header p{margin:4px 0;color:#dbe3ea}
+.wrap{max-width:1250px;margin:0 auto;padding:22px 5vw}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.controls button,.controls select{border:1px solid var(--border);border-radius:10px;background:#fff;padding:11px;cursor:pointer;font:inherit}
+.controls button{background:var(--accent);color:#fff;border-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat,.day{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.stat strong{display:block;font-size:25px}
+.stat span{color:var(--muted)}
+.day{margin-bottom:14px}
+.day-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px}
+.day-head small{color:var(--muted)}
+.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#e8edff;color:#2448ce;font-size:12px;font-weight:650;white-space:nowrap}
+.badge.fixed{background:#ffe2ac;color:#8a5600}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.slot{border:1px solid var(--border);border-radius:10px;padding:12px;min-height:150px;display:flex;flex-direction:column}
+.slot h3{font-size:13px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px}
+.slot textarea{width:100%;flex:1;min-height:85px;resize:vertical;border:1px solid transparent;outline:0;background:transparent;font:inherit;color:var(--ink);padding:2px}
+.slot textarea:focus{border-color:var(--border);background:#fafbfc}
+.actions{display:flex;gap:7px;margin-top:9px}
+.actions button{border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 8px;cursor:pointer;font-size:13px}
+.actions .remove{color:var(--danger)}
+.notes{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:20px}
+.notes textarea{width:100%;min-height:110px;border:1px solid var(--border);border-radius:9px;padding:10px;font:inherit}
+.hint{color:var(--muted);font-size:13px}
+.empty{padding:25px;text-align:center;color:var(--muted)}
+.diag{font-size:12px;color:var(--muted);margin-top:10px}
+@media(max-width:800px){.controls,.stats,.slots{grid-template-columns:1fr}.day-head{display:block}.day-head .badge{margin-top:8px}}
+</style>
+</head>
+<body>
+<header>
+<h1>Suedkorea-Reise Dashboard</h1>
+<p>5.-15. Oktober 2026 - 3 Personen - Seoul als Basis - Unterkunft bevorzugt in Itaewon</p>
+</header>
+<main class="wrap">
+
+<div class="controls">
+<select id="filter">
+<option value="all">Alle Tage</option>
+<option value="fixed">Nur fixe Punkte</option>
+<option value="free">Nur flexible Tage</option>
+</select>
+<button id="addDay">+ Tag hinzufuegen</button>
+<button id="reset">Plan zuruecksetzen</button>
+<button id="export">Plan exportieren</button>
+</div>
+
+<div class="stats">
+<div class="stat"><strong id="dayCount">0</strong><span>Tage im Plan</span></div>
+<div class="stat"><strong id="fixedCount">0</strong><span>fixe Programmpunkte</span></div>
+<div class="stat"><strong id="filledCount">0</strong><span>ausgefuellte Zeitbloecke</span></div>
+<div class="stat"><strong id="progress">0%</strong><span>Planungsfortschritt</span></div>
+</div>
+
+<section id="days"></section>
+
+<section class="notes">
+<h2>Gemeinsame Notizen</h2>
+<p class="hint">Unterkunft, Budget, Tickets, Restaurantideen, Clubnaechte und offene Entscheidungen.</p>
+<textarea id="notes" placeholder="Notizen hier eintragen ..."></textarea>
+</section>
+
+<p class="diag" id="diag"></p>
+</main>
+
+<script>
+var DEFAULT_PLAN = [
+  {id:1, date:"Mo, 5. Okt.", title:"Ankunftstag - Hongdae", type:"flex",
+   slots:["Ankommen, Einreise, Gepaeck und Fahrt zur Unterkunft.",
+          "Check-in und Pause. Eigenes Programm in Hongdae; optional Yeonnam-dong.",
+          "Gemeinsames Abendessen in Hongdae; Street Food; optionale erste Clubnacht."]},
+  {id:2, date:"Di, 6. Okt.", title:"Palaeste und traditionelles Seoul", type:"flex",
+   slots:["Fruehstueck; Gyeongbokgung Palace; Bukchon Hanok Village.",
+          "Insadong; traditionelles Mittagessen; Ikseondong und Cafes.",
+          "Koreanisches BBQ; Jongno oder Euljiro; optionale Clubnacht."]},
+  {id:3, date:"Mi, 7. Okt.", title:"Baseball oder Dongdaemun", type:"flex",
+   slots:["Changdeokgung oder Gyeongbokgung; Mittagessen in Jongno.",
+          "Baseball vorbereiten und zum Stadion fahren; alternativ Gwangjang Market und DDP.",
+          "Baseballspiel; alternativ Abendessen in Euljiro und Itaewon-Bar."]},
+  {id:4, date:"Do, 8. Okt.", title:"DMZ-Tour", type:"fixed",
+   slots:["Frueher Start; Fruehstueck zum Mitnehmen; organisierte DMZ-Tour. Originalpass mitnehmen.",
+          "Fortsetzung der DMZ-Tour; Rueckkehr nach Seoul am spaeten Nachmittag.",
+          "Ruhiges Abendessen in Itaewon; entspannte Bar."]},
+  {id:5, date:"Fr, 9. Okt.", title:"Namsan, Shopping und Nachtleben", type:"flex",
+   slots:["Namsan Seoul Tower oder Namsan-Wanderung; Mittagessen in Myeongdong.",
+          "Myeongdong Shopping; Namdaemun Market; Pause.",
+          "Abendessen in Itaewon; Rooftop-Bar und Clubnacht."]},
+  {id:6, date:"Sa, 10. Okt.", title:"FC Seoul gegen Jeju SK", type:"fixed",
+   slots:["Fruehstueck; Mangwon oder Han River; fruehes Mittagessen.",
+          "Zum Seoul World Cup Stadium; Spiel ab ca. 14:00 Uhr.",
+          "Abendessen in Hongdae; Street Performance und grosse Clubnacht."]},
+  {id:7, date:"So, 11. Okt.", title:"Suwon und Hwaseong-Festung", type:"flex",
+   slots:["Fahrt nach Suwon; Hwaseong-Festung und Stadtmauer.",
+          "Mittagessen; Haenggung-dong; Cafes und Geschaefte.",
+          "Rueckkehr; Abendessen in Itaewon; Karaoke oder ruhiger Abend."]},
+  {id:8, date:"Mo, 12. Okt.", title:"Seongsu und Seoul Forest", type:"flex",
+   slots:["Spaetes Fruehstueck; Seoul Forest.",
+          "Seongsu: Cafes, Concept Stores, Pop-ups und Streetwear.",
+          "Gangnam oder Hannam; Rooftop-Bar; optional Clubnacht."]},
+  {id:9, date:"Di, 13. Okt.", title:"Incheon oder Nami Island", type:"flex",
+   slots:["OPTION A: Incheon Chinatown. OPTION B: frueher Start nach Nami Island.",
+          "Incheon: Jayu Park und Open Port. Oder Nami Island und Garden of Morning Calm.",
+          "Rueckkehr; Abendessen und Bar oder Erholung."]},
+  {id:10, date:"Mi, 14. Okt.", title:"Letzter Seoul-Tag", type:"flex",
+   slots:["Lieblingsort oder offene Sehenswuerdigkeit nachholen.",
+          "Letzte Einkaeufe; Gepaeck organisieren; Pause.",
+          "Abschlussessen; Rooftop-Bar und letzter Spaziergang."]},
+  {id:11, date:"Do, 15. Okt.", title:"Abreise", type:"fixed",
+   slots:["Fruehstueck; Check-out; Gepaeck und Flughafentransfer je nach Flugzeit.",
+          "Flughafen und Check-in.",
+          "Ruckflug."]}
+];
+
+var STORAGE_KEY = "koreaPlan_v2";
+var NOTES_KEY = "koreaNotes_v2";
+
+function loadPlan(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return clone(DEFAULT_PLAN);
+    var parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed) || parsed.length === 0) return clone(DEFAULT_PLAN);
+    return parsed;
+  }catch(e){
+    return clone(DEFAULT_PLAN);
+  }
+}
+function clone(x){ return JSON.parse(JSON.stringify(x)); }
+
+var plan = loadPlan();
+document.getElementById("notes").value = localStorage.getItem(NOTES_KEY) || "";
+
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
+  localStorage.setItem(NOTES_KEY, document.getElementById("notes").value);
+  updateStats();
+}
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c];
+  });
+}
+
+function render(){
+  var f = document.getElementById("filter").value;
+  var out = document.getElementById("days");
+  out.innerHTML = "";
+  var shown = plan.filter(function(d){
+    if(f === "all") return true;
+    if(f === "fixed") return d.type === "fixed";
+    return d.type !== "fixed";
+  });
+  if(shown.length === 0){
+    out.innerHTML = '<div class="empty">Keine Tage fuer diesen Filter.</div>';
+    document.getElementById("diag").textContent = "Hinweis: Filter aktiv, Gesamtanzahl Tage im Plan: " + plan.length;
+    return;
+  }
+  document.getElementById("diag").textContent = "";
+  var labels = ["Vormittag","Nachmittag","Abend"];
+  shown.forEach(function(d){
+    var el = document.createElement("article");
+    el.className = "day";
+    el.dataset.id = d.id;
+    var slotsHtml = "";
+    for(var i=0;i<3;i++){
+      slotsHtml += '<div class="slot"><h3>' + labels[i] + '</h3>' +
+        '<textarea data-slot="' + i + '">' + esc(d.slots[i] || "") + '</textarea>' +
+        '<div class="actions">' +
+          '<button data-move="up" data-slot-ref="' + i + '">Hoch</button>' +
+          '<button data-move="down" data-slot-ref="' + i + '">Runter</button>' +
+          '<button class="remove" data-clear="' + i + '">Leeren</button>' +
+        '</div></div>';
+    }
+    el.innerHTML =
+      '<div class="day-head">' +
+        '<div><h2>' + esc(d.date) + ' - ' + esc(d.title) + '</h2>' +
+        '<small>' + (d.type === "fixed" ? "Fixer Programmpunkt" : "Flexibel bearbeitbar") + '</small></div>' +
+        '<span class="badge ' + (d.type === "fixed" ? "fixed" : "") + '">' + (d.type === "fixed" ? "FIX" : "FLEX") + '</span>' +
+      '</div>' +
+      '<div class="slots">' + slotsHtml + '</div>';
+    out.appendChild(el);
+  });
+}
+
+function updateStats(){
+  document.getElementById("dayCount").textContent = plan.length;
+  document.getElementById("fixedCount").textContent = plan.filter(function(d){return d.type === "fixed";}).length;
+  var total = plan.length * 3;
+  var filled = plan.reduce(function(n,d){
+    return n + d.slots.filter(function(x){ return x && x.trim(); }).length;
+  }, 0);
+  document.getElementById("filledCount").textContent = filled;
+  document.getElementById("progress").textContent = total ? Math.round(filled/total*100) + "%" : "0%";
+}
+
+document.getElementById("days").addEventListener("input", function(e){
+  if(e.target.tagName !== "TEXTAREA") return;
+  var dayEl = e.target.closest(".day");
+  var day = plan.find(function(d){ return String(d.id) === dayEl.dataset.id; });
+  if(day) day.slots[e.target.dataset.slot] = e.target.value;
+  save();
+});
+
+document.getElementById("days").addEventListener("click", function(e){
+  var b = e.target;
+  var dayEl = b.closest(".day");
+  if(!dayEl) return;
+  var day = plan.find(function(d){ return String(d.id) === dayEl.dataset.id; });
+  if(!day) return;
+  if(b.dataset.clear !== undefined){
+    day.slots[b.dataset.clear] = "";
+    render(); save();
+  }
+  if(b.dataset.move){
+    var j = parseInt(b.dataset.slotRef, 10);
+    var k = b.dataset.move === "up" ? Math.max(0, j-1) : Math.min(2, j+1);
+    var tmp = day.slots[j];
+    day.slots[j] = day.slots[k];
+    day.slots[k] = tmp;
+    render(); save();
+  }
+});
+
+document.getElementById("filter").onchange = render;
+document.getElementById("notes").oninput = save;
+
+document.getElementById("reset").onclick = function(){
+  if(confirm("Den aktuellen Plan wirklich zuruecksetzen?")){
+    plan = clone(DEFAULT_PLAN);
+    render(); save();
+  }
+};
+
+document.getElementById("addDay").onclick = function(){
+  var maxId = plan.reduce(function(m,d){ return Math.max(m, d.id); }, 0);
+  plan.push({id: maxId+1, date: "Neuer Tag", title: "Neuer Programmpunkt", type: "flex", slots: ["","",""]});
+  render(); save();
+};
+
+document.getElementById("export").onclick = function(){
+  var text = plan.map(function(d){
+    return d.date + " - " + d.title + "\n" +
+      "Vormittag: " + d.slots[0] + "\n" +
+      "Nachmittag: " + d.slots[1] + "\n" +
+      "Abend: " + d.slots[2] + "\n";
+  }).join("\n");
+  var blob = new Blob([text], {type: "text/plain"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "suedkorea-reiseplan.txt";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+render();
+updateStats();
+</script>
+</body>
+</html>
