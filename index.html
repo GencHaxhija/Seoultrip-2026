@@ -29,15 +29,16 @@ header p{margin:4px 0;color:#dbe3ea}
 .badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#e8edff;color:#2448ce;font-size:12px;font-weight:650;white-space:nowrap}
 .badge.fixed{background:#ffe2ac;color:#8a5600}
 .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.slot{border:1px solid var(--border);border-radius:10px;padding:12px;min-height:170px;display:flex;flex-direction:column}
+.slot{border:1px solid var(--border);border-radius:10px;padding:12px;min-height:180px;display:flex;flex-direction:column}
 .slot h3{font-size:13px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px}
-.slot textarea{width:100%;flex:1;min-height:70px;resize:vertical;border:1px solid transparent;outline:0;background:transparent;font:inherit;color:var(--ink);padding:2px}
+.slot textarea{width:100%;flex:1;min-height:65px;resize:vertical;border:1px solid transparent;outline:0;background:transparent;font:inherit;color:var(--ink);padding:2px}
 .slot textarea:focus{border-color:var(--border);background:#fafbfc}
 .locrow{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
 .locrow select{flex:1;min-width:140px;border:1px solid var(--border);border-radius:7px;padding:6px;font-size:13px}
 .naverlink{display:inline-flex;align-items:center;gap:4px;background:#03c75a;color:#fff;text-decoration:none;border-radius:7px;padding:6px 9px;font-size:12px;font-weight:650;white-space:nowrap}
 .naverlink:hover{background:#02b350}
 .distance{font-size:12px;color:var(--green);font-weight:650;margin-top:4px}
+.distance .sub{color:var(--muted);font-weight:500}
 .actions{display:flex;gap:7px;margin-top:9px}
 .actions button{border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 8px;cursor:pointer;font-size:13px}
 .actions .remove{color:var(--danger)}
@@ -59,7 +60,7 @@ header p{margin:4px 0;color:#dbe3ea}
 <div class="homebar">
 <label for="homeSelect">Heimstandort (Unterkunft):</label>
 <select id="homeSelect"></select>
-<span class="homehint">Waehle deine Unterkunft. Die Luftlinien-Distanz zu jedem Ort wird darauf basierend angezeigt (Richtwert, keine exakte U-Bahn-Zeit).</span>
+<span class="homehint">Naver-Map-Buttons oeffnen den offiziellen Ortsnamen bzw. die naechste Station direkt in Naver Map. Die Zeitangabe ist eine OePNV-Schaetzung basierend auf Luftlinie und Seouls Bahnnetz-Dichte, keine Live-Route.</span>
 </div>
 
 <div class="controls">
@@ -91,7 +92,7 @@ header p{margin:4px 0;color:#dbe3ea}
 </main>
 
 <script>
-var LOCATIONS = {"Hongdae": [37.5563, 126.9236], "Yeonnam-dong": [37.5615, 126.9255], "Gyeongbokgung Palace": [37.5796, 126.977], "Bukchon Hanok Village": [37.5826, 126.9832], "Insadong": [37.574, 126.9857], "Ikseondong": [37.5731, 126.9908], "Jongno": [37.5704, 126.991], "Euljiro": [37.5663, 126.991], "Changdeokgung Palace": [37.5794, 126.991], "Gwangjang Market": [37.5701, 126.9994], "Dongdaemun Design Plaza": [37.5665, 127.0092], "Itaewon": [37.5347, 126.9947], "DMZ Imjingak": [37.8894, 126.7377], "Namsan Seoul Tower": [37.5512, 126.9882], "Myeongdong": [37.5636, 126.9834], "Namdaemun Market": [37.5599, 126.9773], "Seoul World Cup Stadium": [37.5683, 126.8969], "Mangwon Market": [37.5559, 126.902], "Hwaseong Fortress Suwon": [37.286, 127.0143], "Haenggung-dong Suwon": [37.2836, 127.0092], "Seoul Forest": [37.5445, 127.0374], "Seongsu-dong": [37.5445, 127.0559], "Gangnam": [37.4979, 127.0276], "Hannam-dong": [37.5345, 127.0009], "Incheon Chinatown": [37.4738, 126.6217], "Nami Island": [37.7904, 127.5262], "Garden of Morning Calm": [37.7963, 127.3465], "Han River Banpo": [37.5133, 127.0]};
+var LOCATIONS = {"Hongdae": {"query": "Hongik University Station", "district": "Mapo-gu", "coords": [37.5563, 126.9236]}, "Yeonnam-dong": {"query": "Yeonnam-dong Gyeongui Line Forest Park", "district": "Mapo-gu", "coords": [37.5615, 126.9255]}, "Gyeongbokgung Palace": {"query": "Gyeongbokgung Palace", "district": "Jongno-gu", "coords": [37.5796, 126.977]}, "Bukchon Hanok Village": {"query": "Bukchon Hanok Village", "district": "Jongno-gu", "coords": [37.5826, 126.9832]}, "Insadong": {"query": "Insadong-gil", "district": "Jongno-gu", "coords": [37.574, 126.9857]}, "Ikseondong": {"query": "Ikseondong Hanok Village", "district": "Jongno-gu", "coords": [37.5731, 126.9908]}, "Jongno": {"query": "Jongno 3-ga Station", "district": "Jongno-gu", "coords": [37.5704, 126.991]}, "Euljiro": {"query": "Euljiro 3-ga Station", "district": "Jung-gu", "coords": [37.5663, 126.991]}, "Changdeokgung Palace": {"query": "Changdeokgung Palace", "district": "Jongno-gu", "coords": [37.5794, 126.991]}, "Gwangjang Market": {"query": "Gwangjang Market", "district": "Jongno-gu", "coords": [37.5701, 126.9994]}, "Dongdaemun Design Plaza": {"query": "Dongdaemun Design Plaza", "district": "Jung-gu", "coords": [37.5665, 127.0092]}, "Itaewon": {"query": "Itaewon Station", "district": "Yongsan-gu", "coords": [37.5347, 126.9947]}, "DMZ Imjingak": {"query": "Imjingak Pyeonghwa-Nuri Park", "district": "Paju-si", "coords": [37.8894, 126.7377]}, "Namsan Seoul Tower": {"query": "N Seoul Tower", "district": "Yongsan-gu", "coords": [37.5512, 126.9882]}, "Myeongdong": {"query": "Myeongdong Station", "district": "Jung-gu", "coords": [37.5636, 126.9834]}, "Namdaemun Market": {"query": "Namdaemun Market", "district": "Jung-gu", "coords": [37.5599, 126.9773]}, "Seoul World Cup Stadium": {"query": "Seoul World Cup Stadium", "district": "Mapo-gu", "coords": [37.5683, 126.8969]}, "Mangwon Market": {"query": "Mangwon Traditional Market", "district": "Mapo-gu", "coords": [37.5559, 126.902]}, "Hwaseong Fortress Suwon": {"query": "Hwaseong Fortress Suwon", "district": "Suwon-si", "coords": [37.286, 127.0143]}, "Haenggung-dong Suwon": {"query": "Suwon Hwaseong Haenggung Palace", "district": "Suwon-si", "coords": [37.2836, 127.0092]}, "Seoul Forest": {"query": "Seoul Forest Park", "district": "Seongdong-gu", "coords": [37.5445, 127.0374]}, "Seongsu-dong": {"query": "Seongsu Station", "district": "Seongdong-gu", "coords": [37.5445, 127.0559]}, "Gangnam": {"query": "Gangnam Station", "district": "Gangnam-gu", "coords": [37.4979, 127.0276]}, "Hannam-dong": {"query": "Hannam-dong", "district": "Yongsan-gu", "coords": [37.5345, 127.0009]}, "Incheon Chinatown": {"query": "Incheon Chinatown", "district": "Incheon", "coords": [37.4738, 126.6217]}, "Nami Island": {"query": "Nami Island", "district": "Chuncheon-si", "coords": [37.7904, 127.5262]}, "Garden of Morning Calm": {"query": "The Garden of Morning Calm", "district": "Gapyeong-gun", "coords": [37.7963, 127.3465]}, "Han River Banpo": {"query": "Banpo Hangang Park", "district": "Seocho-gu", "coords": [37.5133, 127.0]}};
 
 var LOCATION_NAMES = Object.keys(LOCATIONS).sort();
 
@@ -105,10 +106,22 @@ function haversine(a, b){
   return R*c;
 }
 
+function estimateTransitMinutes(km){
+  var accessMinutes = 9;
+  var speedKmh;
+  if(km <= 2) speedKmh = 14;
+  else if(km <= 6) speedKmh = 22;
+  else if(km <= 15) speedKmh = 32;
+  else if(km <= 40) speedKmh = 55;
+  else speedKmh = 90;
+  var travelMinutes = (km / speedKmh) * 60;
+  return Math.round(accessMinutes + travelMinutes);
+}
+
 function naverUrl(name){
-  var coords = LOCATIONS[name];
-  if(!coords) return "https://map.naver.com/p/search/" + encodeURIComponent(name);
-  return "https://map.naver.com/p/search/" + encodeURIComponent(name) + "/place?c=" + coords[1] + "," + coords[0] + ",15,0,0,0,dh";
+  var loc = LOCATIONS[name];
+  if(!loc) return "https://map.naver.com/p/search/" + encodeURIComponent(name);
+  return "https://map.naver.com/p/search/" + encodeURIComponent(loc.query);
 }
 
 var DEFAULT_PLAN = [
@@ -180,9 +193,9 @@ var DEFAULT_PLAN = [
    ]}
 ];
 
-var STORAGE_KEY = "koreaPlan_v3";
-var NOTES_KEY = "koreaNotes_v3";
-var HOME_KEY = "koreaHome_v3";
+var STORAGE_KEY = "koreaPlan_v4";
+var NOTES_KEY = "koreaNotes_v4";
+var HOME_KEY = "koreaHome_v4";
 
 function clone(x){ return JSON.parse(JSON.stringify(x)); }
 
@@ -228,9 +241,10 @@ function esc(s){
 function distanceLabel(locName){
   var home = homeSelect.value;
   if(!home || !locName || !LOCATIONS[home] || !LOCATIONS[locName]) return "";
-  if(home === locName) return "Das ist dein Heimstandort";
-  var km = haversine(LOCATIONS[home], LOCATIONS[locName]);
-  return "~" + km.toFixed(1) + " km Luftlinie von " + home;
+  if(home === locName) return {main:"Das ist dein Heimstandort", sub:""};
+  var km = haversine(LOCATIONS[home].coords, LOCATIONS[locName].coords);
+  var minutes = estimateTransitMinutes(km);
+  return {main: "~" + minutes + " Min. mit OePNV", sub: "(" + km.toFixed(1) + " km Luftlinie von " + home + ")"};
 }
 
 function render(){
@@ -257,19 +271,20 @@ function render(){
     for(var i=0;i<3;i++){
       var slot = d.slots[i];
       var locName = slot.loc || "";
-      var distLabel = distanceLabel(locName);
+      var dist = distanceLabel(locName);
       var optionsHtml = '<option value="">-- kein Ort --</option>';
       LOCATION_NAMES.forEach(function(name){
         optionsHtml += '<option value="' + esc(name) + '"' + (name === locName ? ' selected' : '') + '>' + esc(name) + '</option>';
       });
       var linkHtml = locName ? '<a class="naverlink" target="_blank" rel="noopener" href="' + naverUrl(locName) + '">Naver Map</a>' : '';
+      var distHtml = dist ? '<div class="distance">' + esc(dist.main) + (dist.sub ? ' <span class="sub">' + esc(dist.sub) + '</span>' : '') + '</div>' : '';
       slotsHtml += '<div class="slot"><h3>' + labels[i] + '</h3>' +
         '<textarea data-slot="' + i + '">' + esc(slot.text || "") + '</textarea>' +
         '<div class="locrow">' +
           '<select data-locslot="' + i + '">' + optionsHtml + '</select>' +
           linkHtml +
         '</div>' +
-        (distLabel ? '<div class="distance">' + esc(distLabel) + '</div>' : '') +
+        distHtml +
         '<div class="actions">' +
           '<button data-move="up" data-slot-ref="' + i + '">Hoch</button>' +
           '<button data-move="down" data-slot-ref="' + i + '">Runter</button>' +
