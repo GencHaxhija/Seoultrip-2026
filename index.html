@@ -1,373 +1,1438 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Suedkorea-Reise Dashboard</title>
-<style>
-:root{--bg:#f4f6f8;--card:#fff;--ink:#17202a;--muted:#65727e;--accent:#315efb;--fixed:#fff0d9;--border:#dce2e8;--danger:#d64545;--green:#1a8754}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{background:#17202a;color:#fff;padding:26px 5vw}
-h1,h2,h3{margin:0 0 8px}
-header p{margin:4px 0;color:#dbe3ea}
-.wrap{max-width:1250px;margin:0 auto;padding:22px 5vw}
-.homebar{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-.homebar label{font-weight:650;font-size:14px}
-.homebar select{flex:1;min-width:220px;border:1px solid var(--border);border-radius:10px;padding:10px;font:inherit}
-.homebar .homehint{color:var(--muted);font-size:13px;width:100%}
-.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
-.controls button,.controls select{border:1px solid var(--border);border-radius:10px;background:#fff;padding:11px;cursor:pointer;font:inherit}
-.controls button{background:var(--accent);color:#fff;border-color:var(--accent)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
-.stat,.day{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
-.stat strong{display:block;font-size:25px}
-.stat span{color:var(--muted)}
-.day{margin-bottom:14px}
-.day-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px}
-.day-head small{color:var(--muted)}
-.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#e8edff;color:#2448ce;font-size:12px;font-weight:650;white-space:nowrap}
-.badge.fixed{background:#ffe2ac;color:#8a5600}
-.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.slot{border:1px solid var(--border);border-radius:10px;padding:12px;min-height:180px;display:flex;flex-direction:column}
-.slot h3{font-size:13px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px}
-.slot textarea{width:100%;flex:1;min-height:65px;resize:vertical;border:1px solid transparent;outline:0;background:transparent;font:inherit;color:var(--ink);padding:2px}
-.slot textarea:focus{border-color:var(--border);background:#fafbfc}
-.locrow{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
-.locrow select{flex:1;min-width:140px;border:1px solid var(--border);border-radius:7px;padding:6px;font-size:13px}
-.naverlink{display:inline-flex;align-items:center;gap:4px;background:#03c75a;color:#fff;text-decoration:none;border-radius:7px;padding:6px 9px;font-size:12px;font-weight:650;white-space:nowrap}
-.naverlink:hover{background:#02b350}
-.distance{font-size:12px;color:var(--green);font-weight:650;margin-top:4px}
-.distance .sub{color:var(--muted);font-weight:500}
-.actions{display:flex;gap:7px;margin-top:9px}
-.actions button{border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 8px;cursor:pointer;font-size:13px}
-.actions .remove{color:var(--danger)}
-.notes{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:20px}
-.notes textarea{width:100%;min-height:110px;border:1px solid var(--border);border-radius:9px;padding:10px;font:inherit}
-.hint{color:var(--muted);font-size:13px}
-.empty{padding:25px;text-align:center;color:var(--muted)}
-.diag{font-size:12px;color:var(--muted);margin-top:10px}
-@media(max-width:800px){.controls,.stats,.slots{grid-template-columns:1fr}.day-head{display:block}.day-head .badge{margin-top:8px}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seoul 2026 – Reise Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #131b2e;
+      --surface-card: #182238;
+      --surface-hover: #1f2c49;
+      --surface-input: #0e1526;
+      --border: rgba(255, 255, 255, 0.09);
+      --border-focus: #4f7fff;
+      --ink: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #4f7fff;
+      --accent-glow: rgba(79, 127, 255, 0.25);
+      --fixed-bg: rgba(245, 158, 11, 0.12);
+      --fixed-text: #fbbf24;
+      --fixed-border: rgba(245, 158, 11, 0.35);
+      --flex-bg: rgba(59, 130, 246, 0.12);
+      --flex-text: #60a5fa;
+      --flex-border: rgba(59, 130, 246, 0.3);
+      --naver: #03c75a;
+      --naver-hover: #02b350;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --home-gold: #f59e0b;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(79, 127, 255, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--ink);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* HEADER */
+    header {
+      background: rgba(19, 27, 46, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 5vw;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .title-group h1 {
+      font-size: 26px;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .title-group p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .header-tag {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+    .btn:hover {
+      background: var(--surface-hover);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .btn-primary:hover {
+      background: #3d6df2;
+      border-color: #3d6df2;
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+    .btn-naver {
+      background: var(--naver);
+      border-color: var(--naver);
+      color: #fff;
+      text-decoration: none;
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+    .btn-naver:hover {
+      background: var(--naver-hover);
+      border-color: var(--naver-hover);
+    }
+    .btn-danger {
+      color: var(--danger);
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    /* WRAPPER */
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px 5vw 60px;
+    }
+
+    /* HOME BAR & ACCOMMODATION */
+    .homebar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    .homebar-icon {
+      font-size: 22px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .homebar-info {
+      flex: 1;
+      min-width: 240px;
+    }
+    .homebar-info label {
+      display: block;
+      font-weight: 700;
+      font-size: 14px;
+      color: #f1f5f9;
+      margin-bottom: 2px;
+    }
+    .homebar-info .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+    }
+    .homebar select {
+      background: var(--surface-input);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      min-width: 220px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .homebar select:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* MAP CONTAINER */
+    .map-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: var(--transition);
+    }
+    .map-header {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--border);
+    }
+    .map-header h3 {
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #map {
+      width: 100%;
+      height: 440px;
+      background: #0f172a;
+    }
+
+    /* CONTROLS BAR */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .filters-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .filter-select {
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .filter-select:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* STATS BAR */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .stat strong {
+      display: block;
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat span {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* DAY CARD */
+    .day {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 20px;
+      transition: var(--transition);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    .day:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+    .day.dragging {
+      opacity: 0.4;
+      border: 2px dashed var(--accent);
+      transform: scale(0.98);
+    }
+    .day.drag-over {
+      border-top: 3px solid var(--accent);
+      box-shadow: 0 -8px 24px var(--accent-glow);
+    }
+
+    .day-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .day-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 280px;
+    }
+    .drag-handle {
+      cursor: grab;
+      color: var(--muted);
+      font-size: 20px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      user-select: none;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .drag-handle:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+    .day-index-badge {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f1f5f9;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .day-title-inputs {
+      flex: 1;
+    }
+    .day-date-display {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+    .day-title-input {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      width: 100%;
+      border-radius: 6px;
+      padding: 2px 6px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .day-title-input:focus {
+      background: var(--surface-input);
+      border-color: var(--border-focus);
+    }
+
+    .day-head-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+    .badge.fixed {
+      background: var(--fixed-bg);
+      color: var(--fixed-text);
+      border-color: var(--fixed-border);
+    }
+    .badge.flex {
+      background: var(--flex-bg);
+      color: var(--flex-text);
+      border-color: var(--flex-border);
+    }
+    .day-nav-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* SLOTS GRID */
+    .slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .slot {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: var(--transition);
+    }
+    .slot:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+    .slot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .slot-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .slot textarea {
+      width: 100%;
+      flex: 1;
+      min-height: 85px;
+      resize: vertical;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      outline: none;
+      background: var(--surface-input);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      padding: 10px;
+      line-height: 1.45;
+      transition: var(--transition);
+    }
+    .slot textarea:focus {
+      border-color: var(--border-focus);
+      background: #0b1120;
+    }
+
+    .locrow {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .locrow select {
+      flex: 1;
+      min-width: 140px;
+      background: var(--surface-input);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+    .locrow select:focus {
+      border-color: var(--border-focus);
+    }
+
+    .distance-badge {
+      font-size: 12px;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .distance-badge .sub {
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .slot-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .slot-shift-btns {
+      display: flex;
+      gap: 4px;
+    }
+
+    /* NOTES SECTION */
+    .notes-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-top: 30px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    }
+    .notes-section h2 {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .notes-section p {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 14px;
+    }
+    .notes-section textarea {
+      width: 100%;
+      min-height: 140px;
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.5;
+      outline: none;
+      resize: vertical;
+    }
+    .notes-section textarea:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* MAP POPUP STYLES */
+    .leaflet-popup-content-wrapper {
+      background: #182238;
+      color: #f1f5f9;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .leaflet-popup-tip {
+      background: #182238;
+    }
+    .popup-content h4 {
+      font-size: 15px;
+      margin-bottom: 2px;
+      color: #fff;
+    }
+    .popup-content p {
+      font-size: 12px;
+      color: #94a3b8;
+      margin: 0 0 10px;
+    }
+
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 960px) {
+      .slots { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .header-inner { flex-direction: column; align-items: flex-start; }
+      .header-actions { width: 100%; justify-content: space-between; }
+    }
+    @media (max-width: 600px) {
+      .stats { grid-template-columns: 1fr; }
+      .day-head { flex-direction: column; align-items: flex-start; }
+      .day-head-meta { width: 100%; justify-content: space-between; }
+    }
+  </style>
 </head>
 <body>
+
 <header>
-<h1>Suedkorea-Reise Dashboard</h1>
-<p>5.-15. Oktober 2026 - 3 Personen - Seoul als Basis - Unterkunft bevorzugt in Itaewon</p>
+  <div class="header-inner">
+    <div class="title-group">
+      <h1>🇰🇷 Seoul 2026 Reise-Planer</h1>
+      <p>
+        <span>5. – 15. Oktober 2026</span>
+        <span class="header-tag">3 Personen</span>
+        <span class="header-tag">Basis: Seoul</span>
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn" id="toggleMapBtn">🗺️ Karte anzeigen</button>
+      <button class="btn btn-primary" id="addDayBtn">+ Tag anfügen</button>
+    </div>
+  </div>
 </header>
+
 <main class="wrap">
 
-<div class="homebar">
-<label for="homeSelect">Heimstandort (Unterkunft):</label>
-<select id="homeSelect"></select>
-<span class="homehint">Naver-Map-Buttons oeffnen den offiziellen Ortsnamen bzw. die naechste Station direkt in Naver Map. Die Zeitangabe ist eine OePNV-Schaetzung basierend auf Luftlinie und Seouls Bahnnetz-Dichte, keine Live-Route.</span>
-</div>
+  <!-- HOME STANDORT / UNTERKUNFT -->
+  <div class="homebar">
+    <div class="homebar-icon">🏠</div>
+    <div class="homebar-info">
+      <label for="homeSelect">Heimstandort & Unterkunft</label>
+      <p class="hint">Referenzpunkt für automatische ÖPNV-Fahrzeit- und Distanzschätzungen.</p>
+    </div>
+    <select id="homeSelect"></select>
+  </div>
 
-<div class="controls">
-<select id="filter">
-<option value="all">Alle Tage</option>
-<option value="fixed">Nur fixe Punkte</option>
-<option value="free">Nur flexible Tage</option>
-</select>
-<button id="addDay">+ Tag hinzufuegen</button>
-<button id="reset">Plan zuruecksetzen</button>
-</div>
+  <!-- INTERAKTIVE KARTE (TOGGLEABLE) -->
+  <section class="map-section" id="mapContainer" style="display: none;">
+    <div class="map-header">
+      <h3>📍 Interaktive Seoul-Karte <small style="color:var(--muted); font-size:13px; font-weight:normal;">(Alle geplanten Stationen & Unterkunft)</small></h3>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm" id="centerHomeBtn">Zu Unterkunft</button>
+        <button class="btn btn-sm" id="closeMapBtn">Schliessen ✕</button>
+      </div>
+    </div>
+    <div id="map"></div>
+  </section>
 
-<div class="stats">
-<div class="stat"><strong id="dayCount">0</strong><span>Tage im Plan</span></div>
-<div class="stat"><strong id="fixedCount">0</strong><span>fixe Programmpunkte</span></div>
-<div class="stat"><strong id="filledCount">0</strong><span>ausgefuellte Zeitbloecke</span></div>
-<div class="stat"><strong id="progress">0%</strong><span>Planungsfortschritt</span></div>
-</div>
+  <!-- CONTROLS & FILTER -->
+  <div class="controls-bar">
+    <div class="filters-group">
+      <select id="filter" class="filter-select">
+        <option value="all">Alle Tage anzeigen</option>
+        <option value="fixed">Nur fixe Programmpunkte (Fix)</option>
+        <option value="flex">Nur flexible Tage (Flex)</option>
+      </select>
+      <span style="font-size:13px; color:var(--muted);">
+        💡 <strong>Tipp:</strong> Ziehe Tage am Griff <code>⋮⋮</code> oder nutze <code>▲/▼</code>, um sie zu verschieben. Die Daten passen sich automatisch an!
+      </span>
+    </div>
+    <button class="btn btn-danger btn-sm" id="resetBtn">Plan zurücksetzen</button>
+  </div>
 
-<section id="days"></section>
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <strong id="dayCount">0</strong>
+      <span>Tage im Reiseplan</span>
+    </div>
+    <div class="stat">
+      <strong id="fixedCount">0</strong>
+      <span>Fixe Programmpunkte</span>
+    </div>
+    <div class="stat">
+      <strong id="filledCount">0</strong>
+      <span>Geplante Zeitblöcke</span>
+    </div>
+    <div class="stat">
+      <strong id="progress">0%</strong>
+      <span>Reise-Fortschritt</span>
+    </div>
+  </div>
 
-<section class="notes">
-<h2>Gemeinsame Notizen</h2>
-<p class="hint">Unterkunft, Budget, Tickets, Restaurantideen, Clubnaechte und offene Entscheidungen.</p>
-<textarea id="notes" placeholder="Notizen hier eintragen ..."></textarea>
-</section>
+  <!-- DAYS CONTAINER -->
+  <section id="daysList"></section>
 
-<p class="diag" id="diag"></p>
+  <!-- GEMEINSAME NOTIZEN -->
+  <section class="notes-section">
+    <h2>📝 Gemeinsame Reise-Notizen</h2>
+    <p>Ideen, Restaurant-Empfehlungen, Clubnächte, wichtige Adressen und Notizen für die Gruppe.</p>
+    <textarea id="notes" placeholder="Hier gemeinsame Notizen, Packtipps, Restaurant-Links oder offene Punkte eintragen ..."></textarea>
+  </section>
+
 </main>
 
 <script>
-var LOCATIONS = {"Hongdae": {"query": "Hongik University Station", "district": "Mapo-gu", "coords": [37.5563, 126.9236]}, "Yeonnam-dong": {"query": "Yeonnam-dong Gyeongui Line Forest Park", "district": "Mapo-gu", "coords": [37.5615, 126.9255]}, "Gyeongbokgung Palace": {"query": "Gyeongbokgung Palace", "district": "Jongno-gu", "coords": [37.5796, 126.977]}, "Bukchon Hanok Village": {"query": "Bukchon Hanok Village", "district": "Jongno-gu", "coords": [37.5826, 126.9832]}, "Insadong": {"query": "Insadong-gil", "district": "Jongno-gu", "coords": [37.574, 126.9857]}, "Ikseondong": {"query": "Ikseondong Hanok Village", "district": "Jongno-gu", "coords": [37.5731, 126.9908]}, "Jongno": {"query": "Jongno 3-ga Station", "district": "Jongno-gu", "coords": [37.5704, 126.991]}, "Euljiro": {"query": "Euljiro 3-ga Station", "district": "Jung-gu", "coords": [37.5663, 126.991]}, "Changdeokgung Palace": {"query": "Changdeokgung Palace", "district": "Jongno-gu", "coords": [37.5794, 126.991]}, "Gwangjang Market": {"query": "Gwangjang Market", "district": "Jongno-gu", "coords": [37.5701, 126.9994]}, "Dongdaemun Design Plaza": {"query": "Dongdaemun Design Plaza", "district": "Jung-gu", "coords": [37.5665, 127.0092]}, "Itaewon": {"query": "Itaewon Station", "district": "Yongsan-gu", "coords": [37.5347, 126.9947]}, "DMZ Imjingak": {"query": "Imjingak Pyeonghwa-Nuri Park", "district": "Paju-si", "coords": [37.8894, 126.7377]}, "Namsan Seoul Tower": {"query": "N Seoul Tower", "district": "Yongsan-gu", "coords": [37.5512, 126.9882]}, "Myeongdong": {"query": "Myeongdong Station", "district": "Jung-gu", "coords": [37.5636, 126.9834]}, "Namdaemun Market": {"query": "Namdaemun Market", "district": "Jung-gu", "coords": [37.5599, 126.9773]}, "Seoul World Cup Stadium": {"query": "Seoul World Cup Stadium", "district": "Mapo-gu", "coords": [37.5683, 126.8969]}, "Mangwon Market": {"query": "Mangwon Traditional Market", "district": "Mapo-gu", "coords": [37.5559, 126.902]}, "Hwaseong Fortress Suwon": {"query": "Hwaseong Fortress Suwon", "district": "Suwon-si", "coords": [37.286, 127.0143]}, "Haenggung-dong Suwon": {"query": "Suwon Hwaseong Haenggung Palace", "district": "Suwon-si", "coords": [37.2836, 127.0092]}, "Seoul Forest": {"query": "Seoul Forest Park", "district": "Seongdong-gu", "coords": [37.5445, 127.0374]}, "Seongsu-dong": {"query": "Seongsu Station", "district": "Seongdong-gu", "coords": [37.5445, 127.0559]}, "Gangnam": {"query": "Gangnam Station", "district": "Gangnam-gu", "coords": [37.4979, 127.0276]}, "Hannam-dong": {"query": "Hannam-dong", "district": "Yongsan-gu", "coords": [37.5345, 127.0009]}, "Incheon Chinatown": {"query": "Incheon Chinatown", "district": "Incheon", "coords": [37.4738, 126.6217]}, "Nami Island": {"query": "Nami Island", "district": "Chuncheon-si", "coords": [37.7904, 127.5262]}, "Garden of Morning Calm": {"query": "The Garden of Morning Calm", "district": "Gapyeong-gun", "coords": [37.7963, 127.3465]}, "Han River Banpo": {"query": "Banpo Hangang Park", "district": "Seocho-gu", "coords": [37.5133, 127.0]}};
+// ==========================================
+// 1. LOCATIONS & METADATA
+// ==========================================
+var LOCATIONS = {
+  "Hongdae": { "query": "Hongik University Station", "district": "Mapo-gu", "coords": [37.5563, 126.9236] },
+  "Yeonnam-dong": { "query": "Yeonnam-dong Gyeongui Line Forest Park", "district": "Mapo-gu", "coords": [37.5615, 126.9255] },
+  "Gyeongbokgung Palace": { "query": "Gyeongbokgung Palace", "district": "Jongno-gu", "coords": [37.5796, 126.9770] },
+  "Bukchon Hanok Village": { "query": "Bukchon Hanok Village", "district": "Jongno-gu", "coords": [37.5826, 126.9832] },
+  "Insadong": { "query": "Insadong-gil", "district": "Jongno-gu", "coords": [37.5740, 126.9857] },
+  "Ikseondong": { "query": "Ikseondong Hanok Village", "district": "Jongno-gu", "coords": [37.5731, 126.9908] },
+  "Jongno": { "query": "Jongno 3-ga Station", "district": "Jongno-gu", "coords": [37.5704, 126.9910] },
+  "Euljiro": { "query": "Euljiro 3-ga Station", "district": "Jung-gu", "coords": [37.5663, 126.9910] },
+  "Changdeokgung Palace": { "query": "Changdeokgung Palace", "district": "Jongno-gu", "coords": [37.5794, 126.9910] },
+  "Gwangjang Market": { "query": "Gwangjang Market", "district": "Jongno-gu", "coords": [37.5701, 126.9994] },
+  "Dongdaemun Design Plaza": { "query": "Dongdaemun Design Plaza", "district": "Jung-gu", "coords": [37.5665, 127.0092] },
+  "Itaewon": { "query": "Itaewon Station", "district": "Yongsan-gu", "coords": [37.5347, 126.9947] },
+  "DMZ Imjingak": { "query": "Imjingak Pyeonghwa-Nuri Park", "district": "Paju-si", "coords": [37.8894, 126.7377] },
+  "Namsan Seoul Tower": { "query": "N Seoul Tower", "district": "Yongsan-gu", "coords": [37.5512, 126.9882] },
+  "Myeongdong": { "query": "Myeongdong Station", "district": "Jung-gu", "coords": [37.5636, 126.9834] },
+  "Namdaemun Market": { "query": "Namdaemun Market", "district": "Jung-gu", "coords": [37.5599, 126.9773] },
+  "Seoul World Cup Stadium": { "query": "Seoul World Cup Stadium", "district": "Mapo-gu", "coords": [37.5683, 126.8969] },
+  "Mangwon Market": { "query": "Mangwon Traditional Market", "district": "Mapo-gu", "coords": [37.5559, 126.9020] },
+  "Hwaseong Fortress Suwon": { "query": "Hwaseong Fortress Suwon", "district": "Suwon-si", "coords": [37.2860, 127.0143] },
+  "Haenggung-dong Suwon": { "query": "Suwon Hwaseong Haenggung Palace", "district": "Suwon-si", "coords": [37.2836, 127.0092] },
+  "Seoul Forest": { "query": "Seoul Forest Park", "district": "Seongdong-gu", "coords": [37.5445, 127.0374] },
+  "Seongsu-dong": { "query": "Seongsu Station", "district": "Seongdong-gu", "coords": [37.5445, 127.0559] },
+  "Gangnam": { "query": "Gangnam Station", "district": "Gangnam-gu", "coords": [37.4979, 127.0276] },
+  "Hannam-dong": { "query": "Hannam-dong", "district": "Yongsan-gu", "coords": [37.5345, 127.0009] },
+  "Incheon Chinatown": { "query": "Incheon Chinatown", "district": "Incheon", "coords": [37.4738, 126.6217] },
+  "Nami Island": { "query": "Nami Island", "district": "Chuncheon-si", "coords": [37.7904, 127.5262] },
+  "Garden of Morning Calm": { "query": "The Garden of Morning Calm", "district": "Gapyeong-gun", "coords": [37.7963, 127.3465] },
+  "Han River Banpo": { "query": "Banpo Hangang Park", "district": "Seocho-gu", "coords": [37.5133, 127.0000] }
+};
 
 var LOCATION_NAMES = Object.keys(LOCATIONS).sort();
 
-function haversine(a, b){
-  var R = 6371;
-  var dLat = (b[0]-a[0]) * Math.PI/180;
-  var dLon = (b[1]-a[1]) * Math.PI/180;
-  var lat1 = a[0]*Math.PI/180, lat2 = b[0]*Math.PI/180;
-  var x = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)*Math.sin(dLon/2);
-  var c = 2*Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
-  return R*c;
+// Startdatum des Seoul-Trips: Montag, 5. Oktober 2026
+var START_YEAR = 2026;
+var START_MONTH = 9; // 0-indexed -> 9 = Oktober
+var START_DAY = 5;
+var WEEKDAYS_DE = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+var MONTHS_DE = ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sept.", "Okt.", "Nov.", "Dez."];
+
+function getFormattedDate(offsetDays) {
+  var d = new Date(START_YEAR, START_MONTH, START_DAY + offsetDays);
+  var wday = WEEKDAYS_DE[d.getDay()];
+  var dayNum = d.getDate();
+  var monthName = MONTHS_DE[d.getMonth()];
+  return wday + ", " + dayNum + ". " + monthName;
 }
 
-function estimateTransitMinutes(km){
-  var accessMinutes = 9;
-  var speedKmh;
-  if(km <= 2) speedKmh = 14;
-  else if(km <= 6) speedKmh = 22;
-  else if(km <= 15) speedKmh = 32;
-  else if(km <= 40) speedKmh = 55;
-  else speedKmh = 90;
-  var travelMinutes = (km / speedKmh) * 60;
-  return Math.round(accessMinutes + travelMinutes);
-}
-
-function naverUrl(name){
-  var loc = LOCATIONS[name];
-  if(!loc) return "https://map.naver.com/p/search/" + encodeURIComponent(name);
-  return "https://map.naver.com/p/search/" + encodeURIComponent(loc.query);
-}
-
+// ==========================================
+// 2. DEFAULT ITINERARY DATA
+// ==========================================
 var DEFAULT_PLAN = [
-  {id:1, date:"Mo, 5. Okt.", title:"Ankunftstag - Hongdae", type:"flex",
-   slots:[
-     {text:"Ankommen, Einreise, Gepaeck und Fahrt zur Unterkunft.", loc:""},
-     {text:"Check-in und Pause. Eigenes Programm in Hongdae; optional Yeonnam-dong.", loc:"Hongdae"},
-     {text:"Gemeinsames Abendessen in Hongdae; Street Food; optionale erste Clubnacht.", loc:"Hongdae"}
-   ]},
-  {id:2, date:"Di, 6. Okt.", title:"Palaeste und traditionelles Seoul", type:"flex",
-   slots:[
-     {text:"Fruehstueck; Gyeongbokgung Palace; Bukchon Hanok Village.", loc:"Gyeongbokgung Palace"},
-     {text:"Insadong; traditionelles Mittagessen; Ikseondong und Cafes.", loc:"Insadong"},
-     {text:"Koreanisches BBQ; Jongno oder Euljiro; optionale Clubnacht.", loc:"Jongno"}
-   ]},
-  {id:3, date:"Mi, 7. Okt.", title:"Baseball oder Dongdaemun", type:"flex",
-   slots:[
-     {text:"Changdeokgung oder Gyeongbokgung; Mittagessen in Jongno.", loc:"Changdeokgung Palace"},
-     {text:"Baseball vorbereiten und zum Stadion fahren; alternativ Gwangjang Market und DDP.", loc:"Gwangjang Market"},
-     {text:"Baseballspiel; alternativ Abendessen in Euljiro und Itaewon-Bar.", loc:"Dongdaemun Design Plaza"}
-   ]},
-  {id:4, date:"Do, 8. Okt.", title:"DMZ-Tour", type:"fixed",
-   slots:[
-     {text:"Frueher Start; Fruehstueck zum Mitnehmen; organisierte DMZ-Tour. Originalpass mitnehmen.", loc:"DMZ Imjingak"},
-     {text:"Fortsetzung der DMZ-Tour; Rueckkehr nach Seoul am spaeten Nachmittag.", loc:"DMZ Imjingak"},
-     {text:"Ruhiges Abendessen in Itaewon; entspannte Bar.", loc:"Itaewon"}
-   ]},
-  {id:5, date:"Fr, 9. Okt.", title:"Namsan, Shopping und Nachtleben", type:"flex",
-   slots:[
-     {text:"Namsan Seoul Tower oder Namsan-Wanderung; Mittagessen in Myeongdong.", loc:"Namsan Seoul Tower"},
-     {text:"Myeongdong Shopping; Namdaemun Market; Pause.", loc:"Myeongdong"},
-     {text:"Abendessen in Itaewon; Rooftop-Bar und Clubnacht.", loc:"Itaewon"}
-   ]},
-  {id:6, date:"Sa, 10. Okt.", title:"FC Seoul gegen Jeju SK", type:"fixed",
-   slots:[
-     {text:"Fruehstueck; Mangwon oder Han River; fruehes Mittagessen.", loc:"Mangwon Market"},
-     {text:"Zum Seoul World Cup Stadium; Spiel ab ca. 14:00 Uhr.", loc:"Seoul World Cup Stadium"},
-     {text:"Abendessen in Hongdae; Street Performance und grosse Clubnacht.", loc:"Hongdae"}
-   ]},
-  {id:7, date:"So, 11. Okt.", title:"Suwon und Hwaseong-Festung", type:"flex",
-   slots:[
-     {text:"Fahrt nach Suwon; Hwaseong-Festung und Stadtmauer.", loc:"Hwaseong Fortress Suwon"},
-     {text:"Mittagessen; Haenggung-dong; Cafes und Geschaefte.", loc:"Haenggung-dong Suwon"},
-     {text:"Rueckkehr; Abendessen in Itaewon; Karaoke oder ruhiger Abend.", loc:"Itaewon"}
-   ]},
-  {id:8, date:"Mo, 12. Okt.", title:"Seongsu und Seoul Forest", type:"flex",
-   slots:[
-     {text:"Spaetes Fruehstueck; Seoul Forest.", loc:"Seoul Forest"},
-     {text:"Seongsu: Cafes, Concept Stores, Pop-ups und Streetwear.", loc:"Seongsu-dong"},
-     {text:"Gangnam oder Hannam; Rooftop-Bar; optional Clubnacht.", loc:"Gangnam"}
-   ]},
-  {id:9, date:"Di, 13. Okt.", title:"Incheon oder Nami Island", type:"flex",
-   slots:[
-     {text:"OPTION A: Incheon Chinatown. OPTION B: frueher Start nach Nami Island.", loc:"Incheon Chinatown"},
-     {text:"Incheon: Jayu Park und Open Port. Oder Nami Island und Garden of Morning Calm.", loc:"Nami Island"},
-     {text:"Rueckkehr; Abendessen und Bar oder Erholung.", loc:"Itaewon"}
-   ]},
-  {id:10, date:"Mi, 14. Okt.", title:"Letzter Seoul-Tag", type:"flex",
-   slots:[
-     {text:"Lieblingsort oder offene Sehenswuerdigkeit nachholen.", loc:""},
-     {text:"Letzte Einkaeufe; Gepaeck organisieren; Pause.", loc:"Myeongdong"},
-     {text:"Abschlussessen; Rooftop-Bar und letzter Spaziergang.", loc:"Han River Banpo"}
-   ]},
-  {id:11, date:"Do, 15. Okt.", title:"Abreise", type:"fixed",
-   slots:[
-     {text:"Fruehstueck; Check-out; Gepaeck und Flughafentransfer je nach Flugzeit.", loc:""},
-     {text:"Flughafen und Check-in.", loc:""},
-     {text:"Ruckflug.", loc:""}
-   ]}
+  {
+    id: 1, title: "Ankunftstag – Hongdae", type: "flex",
+    slots: [
+      { text: "Ankommen, Einreise, Gepäck und Fahrt zur Unterkunft.", loc: "" },
+      { text: "Check-in und Pause. Eigenes Programm in Hongdae; optional Yeonnam-dong.", loc: "Hongdae" },
+      { text: "Gemeinsames Abendessen in Hongdae; Street Food; optionale erste Clubnacht.", loc: "Hongdae" }
+    ]
+  },
+  {
+    id: 2, title: "Paläste und traditionelles Seoul", type: "flex",
+    slots: [
+      { text: "Frühstück; Gyeongbokgung Palace; Bukchon Hanok Village.", loc: "Gyeongbokgung Palace" },
+      { text: "Insadong; traditionelles Mittagessen; Ikseondong und Cafés.", loc: "Insadong" },
+      { text: "Koreanisches BBQ; Jongno oder Euljiro; optionale Clubnacht.", loc: "Jongno" }
+    ]
+  },
+  {
+    id: 3, title: "Baseball oder Dongdaemun", type: "flex",
+    slots: [
+      { text: "Changdeokgung oder Gyeongbokgung; Mittagessen in Jongno.", loc: "Changdeokgung Palace" },
+      { text: "Baseball vorbereiten und zum Stadion fahren; alternativ Gwangjang Market und DDP.", loc: "Gwangjang Market" },
+      { text: "Baseballspiel; alternativ Abendessen in Euljiro und Itaewon-Bar.", loc: "Dongdaemun Design Plaza" }
+    ]
+  },
+  {
+    id: 4, title: "DMZ-Tour", type: "fixed",
+    slots: [
+      { text: "Früher Start; Frühstück zum Mitnehmen; organisierte DMZ-Tour. Originalpass mitnehmen!", loc: "DMZ Imjingak" },
+      { text: "Fortsetzung der DMZ-Tour; Rückkehr nach Seoul am späten Nachmittag.", loc: "DMZ Imjingak" },
+      { text: "Ruhiges Abendessen in Itaewon; entspannte Bar.", loc: "Itaewon" }
+    ]
+  },
+  {
+    id: 5, title: "Namsan, Shopping und Nachtleben", type: "flex",
+    slots: [
+      { text: "Namsan Seoul Tower oder Namsan-Wanderung; Mittagessen in Myeongdong.", loc: "Namsan Seoul Tower" },
+      { text: "Myeongdong Shopping; Namdaemun Market; Pause.", loc: "Myeongdong" },
+      { text: "Abendessen in Itaewon; Rooftop-Bar und Clubnacht.", loc: "Itaewon" }
+    ]
+  },
+  {
+    id: 6, title: "FC Seoul gegen Jeju SK", type: "fixed",
+    slots: [
+      { text: "Frühstück; Mangwon oder Han River; frühes Mittagessen.", loc: "Mangwon Market" },
+      { text: "Zum Seoul World Cup Stadium; Spiel ab ca. 14:00 Uhr.", loc: "Seoul World Cup Stadium" },
+      { text: "Abendessen in Hongdae; Street Performance und grosse Clubnacht.", loc: "Hongdae" }
+    ]
+  },
+  {
+    id: 7, title: "Suwon und Hwaseong-Festung", type: "flex",
+    slots: [
+      { text: "Fahrt nach Suwon; Hwaseong-Festung und Stadtmauer.", loc: "Hwaseong Fortress Suwon" },
+      { text: "Mittagessen; Haenggung-dong; Cafés und Geschäfte.", loc: "Haenggung-dong Suwon" },
+      { text: "Rückkehr; Abendessen in Itaewon; Karaoke oder ruhiger Abend.", loc: "Itaewon" }
+    ]
+  },
+  {
+    id: 8, title: "Seongsu und Seoul Forest", type: "flex",
+    slots: [
+      { text: "Spätes Frühstück; Seoul Forest Spaziergang.", loc: "Seoul Forest" },
+      { text: "Seongsu: Cafés, Concept Stores, Pop-ups und Streetwear.", loc: "Seongsu-dong" },
+      { text: "Gangnam oder Hannam; Rooftop-Bar; optional Clubnacht.", loc: "Gangnam" }
+    ]
+  },
+  {
+    id: 9, title: "Incheon oder Nami Island", type: "flex",
+    slots: [
+      { text: "OPTION A: Incheon Chinatown. OPTION B: früher Start nach Nami Island.", loc: "Incheon Chinatown" },
+      { text: "Incheon: Jayu Park und Open Port. Oder Nami Island und Garden of Morning Calm.", loc: "Nami Island" },
+      { text: "Rückkehr; Abendessen und Bar oder Erholung.", loc: "Itaewon" }
+    ]
+  },
+  {
+    id: 10, title: "Letzter Seoul-Tag", type: "flex",
+    slots: [
+      { text: "Lieblingsort oder offene Sehenswürdigkeit nachholen.", loc: "" },
+      { text: "Letzte Einkäufe; Gepäck organisieren; Pause.", loc: "Myeongdong" },
+      { text: "Abschlussessen; Rooftop-Bar und letzter Spaziergang am Han River.", loc: "Han River Banpo" }
+    ]
+  },
+  {
+    id: 11, title: "Abreise", type: "fixed",
+    slots: [
+      { text: "Frühstück; Check-out; Gepäck und Flughafentransfer je nach Flugzeit.", loc: "" },
+      { text: "Flughafen und Check-in.", loc: "" },
+      { text: "Rückflug nach Hause.", loc: "" }
+    ]
+  }
 ];
 
-var STORAGE_KEY = "koreaPlan_v4";
-var NOTES_KEY = "koreaNotes_v4";
-var HOME_KEY = "koreaHome_v4";
+// ==========================================
+// 3. STORAGE & STATE
+// ==========================================
+var STORAGE_KEY = "koreaPlan_v5";
+var NOTES_KEY = "koreaNotes_v5";
+var HOME_KEY = "koreaHome_v5";
 
-function clone(x){ return JSON.parse(JSON.stringify(x)); }
+function clone(x) { return JSON.parse(JSON.stringify(x)); }
 
-function loadPlan(){
-  try{
-    var raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return clone(DEFAULT_PLAN);
+// Reassign dates based on current array position
+function reassignDates() {
+  plan.forEach(function(d, index) {
+    d.date = getFormattedDate(index);
+    d.dayNumber = index + 1;
+  });
+}
+
+function loadPlan() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("koreaPlan_v4");
+    if (!raw) {
+      var p = clone(DEFAULT_PLAN);
+      return p;
+    }
     var parsed = JSON.parse(raw);
-    if(!Array.isArray(parsed) || parsed.length === 0) return clone(DEFAULT_PLAN);
+    if (!Array.isArray(parsed) || parsed.length === 0) return clone(DEFAULT_PLAN);
     return parsed;
-  }catch(e){
+  } catch(e) {
     return clone(DEFAULT_PLAN);
   }
 }
 
 var plan = loadPlan();
-document.getElementById("notes").value = localStorage.getItem(NOTES_KEY) || "";
+reassignDates();
+
+var notesEl = document.getElementById("notes");
+notesEl.value = localStorage.getItem(NOTES_KEY) || localStorage.getItem("koreaNotes_v4") || "";
 
 var homeSelect = document.getElementById("homeSelect");
 var emptyOpt = document.createElement("option");
-emptyOpt.value = ""; emptyOpt.textContent = "-- Ort waehlen --";
+emptyOpt.value = ""; emptyOpt.textContent = "-- Ort wählen --";
 homeSelect.appendChild(emptyOpt);
-LOCATION_NAMES.forEach(function(name){
+LOCATION_NAMES.forEach(function(name) {
   var opt = document.createElement("option");
-  opt.value = name; opt.textContent = name;
+  opt.value = name;
+  opt.textContent = name + " (" + LOCATIONS[name].district + ")";
   homeSelect.appendChild(opt);
 });
-homeSelect.value = localStorage.getItem(HOME_KEY) || "Itaewon";
+homeSelect.value = localStorage.getItem(HOME_KEY) || localStorage.getItem("koreaHome_v4") || "Itaewon";
 
-function save(){
+function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
-  localStorage.setItem(NOTES_KEY, document.getElementById("notes").value);
+  localStorage.setItem(NOTES_KEY, notesEl.value);
   localStorage.setItem(HOME_KEY, homeSelect.value);
+  updateStats();
+  if (map) refreshMapMarkers();
+}
+
+// ==========================================
+// 4. DISTANCE & TRANSIT CALCULATION
+// ==========================================
+function haversine(a, b) {
+  var R = 6371;
+  var dLat = (b[0] - a[0]) * Math.PI / 180;
+  var dLon = (b[1] - a[1]) * Math.PI / 180;
+  var lat1 = a[0] * Math.PI / 180, lat2 = b[0] * Math.PI / 180;
+  var x = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+  return R * c;
+}
+
+function estimateTransitMinutes(km) {
+  var accessMinutes = 8;
+  var speedKmh;
+  if (km <= 2) speedKmh = 14;
+  else if (km <= 6) speedKmh = 22;
+  else if (km <= 15) speedKmh = 32;
+  else if (km <= 40) speedKmh = 55;
+  else speedKmh = 90;
+  return Math.round(accessMinutes + (km / speedKmh) * 60);
+}
+
+function naverUrl(name) {
+  var loc = LOCATIONS[name];
+  if (!loc) return "https://map.naver.com/p/search/" + encodeURIComponent(name);
+  return "https://map.naver.com/p/search/" + encodeURIComponent(loc.query);
+}
+
+function distanceLabel(locName) {
+  var home = homeSelect.value;
+  if (!home || !locName || !LOCATIONS[home] || !LOCATIONS[locName]) return null;
+  if (home === locName) return { main: "🏠 Heimstandort", sub: "" };
+  var km = haversine(LOCATIONS[home].coords, LOCATIONS[locName].coords);
+  var minutes = estimateTransitMinutes(km);
+  return { main: "~" + minutes + " Min. ÖPNV", sub: "(" + km.toFixed(1) + " km Luftlinie)" };
+}
+
+function esc(s) {
+  return String(s || "").replace(/[&<>"']/g, function(c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[c];
+  });
+}
+
+// ==========================================
+// 5. INTERACTIVE MAP (LEAFLET)
+// ==========================================
+var map = null;
+var markersLayer = null;
+
+function initMap() {
+  if (map) return;
+  var homeCoords = (homeSelect.value && LOCATIONS[homeSelect.value]) ? LOCATIONS[homeSelect.value].coords : [37.5563, 126.9800];
+  
+  map = L.map('map').setView(homeCoords, 12);
+  
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(map);
+
+  markersLayer = L.layerGroup().addTo(map);
+  refreshMapMarkers();
+}
+
+function refreshMapMarkers() {
+  if (!markersLayer) return;
+  markersLayer.clearLayers();
+
+  var home = homeSelect.value;
+  var bounds = [];
+
+  LOCATION_NAMES.forEach(function(name) {
+    var loc = LOCATIONS[name];
+    var isHome = (name === home);
+
+    // Check if this location is used in the plan
+    var usedInDays = [];
+    plan.forEach(function(d, dIdx) {
+      d.slots.forEach(function(s) {
+        if (s.loc === name) {
+          usedInDays.push("Tag " + (dIdx + 1) + " (" + d.date.split(",")[0] + ")");
+        }
+      });
+    });
+
+    var pinColor = isHome ? "#f59e0b" : (usedInDays.length > 0 ? "#4f7fff" : "#64748b");
+    var pinBorder = isHome ? "#fff" : "rgba(255,255,255,0.8)";
+    var iconSize = isHome ? 32 : (usedInDays.length > 0 ? 26 : 20);
+
+    var customIcon = L.divIcon({
+      className: 'custom-pin',
+      html: '<div style="' +
+        'width:' + iconSize + 'px; height:' + iconSize + 'px; ' +
+        'background:' + pinColor + '; ' +
+        'border: 2px solid ' + pinBorder + '; ' +
+        'border-radius: 50%; ' +
+        'display: flex; align-items: center; justify-content: center; ' +
+        'box-shadow: 0 3px 12px rgba(0,0,0,0.5); font-size:' + (isHome ? 15 : 12) + 'px;' +
+        '">' + (isHome ? '🏠' : (usedInDays.length > 0 ? '📍' : '•')) + '</div>',
+      iconSize: [iconSize, iconSize],
+      iconAnchor: [iconSize/2, iconSize/2]
+    });
+
+    var marker = L.marker(loc.coords, { icon: customIcon });
+    
+    var popupContent = 
+      '<div class="popup-content">' +
+        '<h4>' + esc(name) + (isHome ? ' (Unterkunft)' : '') + '</h4>' +
+        '<p>Bezirk: ' + esc(loc.district) + '</p>' +
+        (usedInDays.length > 0 ? '<p style="color:#60a5fa; font-size:12px; margin-bottom:8px;">Geplant an: ' + esc(usedInDays.join(", ")) + '</p>' : '') +
+        '<div style="display:flex; gap:6px; margin-top:8px;">' +
+          '<a class="btn-naver" target="_blank" rel="noopener" href="' + naverUrl(name) + '">Naver Map ↗</a>' +
+          (!isHome ? '<button class="btn btn-sm" onclick="setAsHome(\'' + esc(name) + '\')">Als Unterkunft</button>' : '') +
+        '</div>' +
+      '</div>';
+
+    marker.bindPopup(popupContent);
+    markersLayer.addLayer(marker);
+    bounds.push(loc.coords);
+  });
+
+  if (bounds.length > 0 && home && LOCATIONS[home]) {
+    map.setView(LOCATIONS[home].coords, 12);
+  }
+}
+
+window.setAsHome = function(name) {
+  homeSelect.value = name;
+  save();
+  render();
+};
+
+document.getElementById("toggleMapBtn").onclick = function() {
+  var container = document.getElementById("mapContainer");
+  if (container.style.display === "none") {
+    container.style.display = "block";
+    this.textContent = "🗺️ Karte ausblenden";
+    setTimeout(function() {
+      initMap();
+      map.invalidateSize();
+    }, 150);
+  } else {
+    container.style.display = "none";
+    this.textContent = "🗺️ Karte anzeigen";
+  }
+};
+
+document.getElementById("closeMapBtn").onclick = function() {
+  document.getElementById("mapContainer").style.display = "none";
+  document.getElementById("toggleMapBtn").textContent = "🗺️ Karte anzeigen";
+};
+
+document.getElementById("centerHomeBtn").onclick = function() {
+  if (map && homeSelect.value && LOCATIONS[homeSelect.value]) {
+    map.flyTo(LOCATIONS[homeSelect.value].coords, 14);
+  }
+};
+
+// ==========================================
+// 6. RENDER DAYS
+// ==========================================
+function render() {
+  reassignDates();
+  var filterVal = document.getElementById("filter").value;
+  var out = document.getElementById("daysList");
+  out.innerHTML = "";
+
+  var filteredList = plan.map(function(day, originalIdx) {
+    return { day: day, originalIdx: originalIdx };
+  }).filter(function(item) {
+    if (filterVal === "all") return true;
+    if (filterVal === "fixed") return item.day.type === "fixed";
+    return item.day.type !== "fixed";
+  });
+
+  if (filteredList.length === 0) {
+    out.innerHTML = '<div class="empty-state">Keine Tage für diesen Filter gefunden.</div>';
+    return;
+  }
+
+  var slotLabels = [
+    { name: "Vormittag", icon: "🌅" },
+    { name: "Nachmittag", icon: "☀️" },
+    { name: "Abend", icon: "🌙" }
+  ];
+
+  filteredList.forEach(function(item) {
+    var d = item.day;
+    var idx = item.originalIdx;
+
+    var article = document.createElement("article");
+    article.className = "day";
+    article.dataset.index = idx;
+    article.draggable = true;
+
+    // Slots HTML
+    var slotsHtml = "";
+    for (var s = 0; s < 3; s++) {
+      var slot = d.slots[s];
+      var locName = slot.loc || "";
+      var dist = distanceLabel(locName);
+
+      var optionsHtml = '<option value="">-- Ort auswählen --</option>';
+      LOCATION_NAMES.forEach(function(name) {
+        optionsHtml += '<option value="' + esc(name) + '"' + (name === locName ? ' selected' : '') + '>' + esc(name) + '</option>';
+      });
+
+      var naverBtn = locName ? '<a class="btn-naver" target="_blank" rel="noopener" href="' + naverUrl(locName) + '">Naver ↗</a>' : '';
+      var distBadge = dist ? '<div class="distance-badge"><span>' + esc(dist.main) + '</span>' + (dist.sub ? '<span class="sub">' + esc(dist.sub) + '</span>' : '') + '</div>' : '';
+
+      slotsHtml += 
+        '<div class="slot">' +
+          '<div class="slot-header">' +
+            '<span class="slot-label">' + slotLabels[s].icon + ' ' + slotLabels[s].name + '</span>' +
+          '</div>' +
+          '<textarea placeholder="Aktivitäten für ' + slotLabels[s].name + ' eintragen ..." data-slot-idx="' + s + '">' + esc(slot.text || "") + '</textarea>' +
+          '<div class="locrow">' +
+            '<select data-loc-idx="' + s + '">' + optionsHtml + '</select>' +
+            naverBtn +
+          '</div>' +
+          distBadge +
+          '<div class="slot-actions">' +
+            '<div class="slot-shift-btns">' +
+              '<button class="btn btn-sm" data-slot-shift="up" data-slot="' + s + '" title="Nach oben verschieben">▲</button>' +
+              '<button class="btn btn-sm" data-slot-shift="down" data-slot="' + s + '" title="Nach unten verschieben">▼</button>' +
+            '</div>' +
+            '<button class="btn btn-sm btn-danger" data-slot-clear="' + s + '">Leeren</button>' +
+          '</div>' +
+        '</div>';
+    }
+
+    var isFirst = (idx === 0);
+    var isLast = (idx === plan.length - 1);
+
+    article.innerHTML = 
+      '<div class="day-head">' +
+        '<div class="day-title-wrap">' +
+          '<div class="drag-handle" title="Gedrückt halten & nach oben/unten ziehen">⋮⋮</div>' +
+          '<span class="day-index-badge">Tag ' + (idx + 1) + '</span>' +
+          '<div class="day-title-inputs">' +
+            '<div class="day-date-display">' + esc(d.date) + '</div>' +
+            '<input type="text" class="day-title-input" value="' + esc(d.title) + '" placeholder="Tagesüberschrift">' +
+          '</div>' +
+        '</div>' +
+        '<div class="day-head-meta">' +
+          '<div class="day-nav-btns">' +
+            '<button class="btn btn-sm" data-day-move="up" ' + (isFirst ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : '') + ' title="Tag 1 Position nach oben verschieben">▲ Vorheriger</button>' +
+            '<button class="btn btn-sm" data-day-move="down" ' + (isLast ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : '') + ' title="Tag 1 Position nach unten verschieben">▼ Nächster</button>' +
+          '</div>' +
+          '<span class="badge ' + (d.type === "fixed" ? "fixed" : "flex") + '" data-toggle-type="true" title="Klicken zum Umschalten zwischen Fix und Flex">' +
+            (d.type === "fixed" ? "🔒 Fixer Punkt" : "✨ Flexibel") +
+          '</span>' +
+          '<button class="btn btn-sm btn-danger" data-day-delete="true" title="Diesen Tag entfernen">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="slots">' + slotsHtml + '</div>';
+
+    out.appendChild(article);
+  });
+
+  attachDragAndDrop();
   updateStats();
 }
 
-function esc(s){
-  return String(s).replace(/[&<>"']/g, function(c){
-    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c];
+// ==========================================
+// 7. DRAG & DROP REORDERING WITH AUTO-DATES
+// ==========================================
+var draggedElementIndex = null;
+
+function attachDragAndDrop() {
+  var dayElements = document.querySelectorAll(".day");
+  
+  dayElements.forEach(function(el) {
+    el.addEventListener("dragstart", function(e) {
+      draggedElementIndex = parseInt(el.dataset.index, 10);
+      el.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", draggedElementIndex);
+    });
+
+    el.addEventListener("dragend", function() {
+      el.classList.remove("dragging");
+      dayElements.forEach(function(d) { d.classList.remove("drag-over"); });
+    });
+
+    el.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      var targetIdx = parseInt(el.dataset.index, 10);
+      if (targetIdx !== draggedElementIndex) {
+        el.classList.add("drag-over");
+      }
+    });
+
+    el.addEventListener("dragleave", function() {
+      el.classList.remove("drag-over");
+    });
+
+    el.addEventListener("drop", function(e) {
+      e.preventDefault();
+      el.classList.remove("drag-over");
+      var targetIndex = parseInt(el.dataset.index, 10);
+      if (draggedElementIndex === null || draggedElementIndex === targetIndex) return;
+
+      // Move element in plan array
+      var movedDay = plan.splice(draggedElementIndex, 1)[0];
+      plan.splice(targetIndex, 0, movedDay);
+
+      // Reassign all calendar dates automatically
+      reassignDates();
+      save();
+      render();
+    });
   });
 }
 
-function distanceLabel(locName){
-  var home = homeSelect.value;
-  if(!home || !locName || !LOCATIONS[home] || !LOCATIONS[locName]) return "";
-  if(home === locName) return {main:"Das ist dein Heimstandort", sub:""};
-  var km = haversine(LOCATIONS[home].coords, LOCATIONS[locName].coords);
-  var minutes = estimateTransitMinutes(km);
-  return {main: "~" + minutes + " Min. mit OePNV", sub: "(" + km.toFixed(1) + " km Luftlinie von " + home + ")"};
+// Move day by 1 step up or down
+function moveDay(fromIndex, toIndex) {
+  if (toIndex < 0 || toIndex >= plan.length || fromIndex === toIndex) return;
+  var moved = plan.splice(fromIndex, 1)[0];
+  plan.splice(toIndex, 0, moved);
+  reassignDates();
+  save();
+  render();
 }
 
-function render(){
-  var f = document.getElementById("filter").value;
-  var out = document.getElementById("days");
-  out.innerHTML = "";
-  var shown = plan.filter(function(d){
-    if(f === "all") return true;
-    if(f === "fixed") return d.type === "fixed";
-    return d.type !== "fixed";
-  });
-  if(shown.length === 0){
-    out.innerHTML = '<div class="empty">Keine Tage fuer diesen Filter.</div>';
-    document.getElementById("diag").textContent = "Hinweis: Filter aktiv, Gesamtanzahl Tage im Plan: " + plan.length;
+// ==========================================
+// 8. EVENT LISTENERS
+// ==========================================
+document.getElementById("daysList").addEventListener("input", function(e) {
+  var dayCard = e.target.closest(".day");
+  if (!dayCard) return;
+  var dayIdx = parseInt(dayCard.dataset.index, 10);
+  var day = plan[dayIdx];
+  if (!day) return;
+
+  if (e.target.classList.contains("day-title-input")) {
+    day.title = e.target.value;
+    save();
+  } else if (e.target.dataset.slotIdx !== undefined) {
+    var slotIdx = parseInt(e.target.dataset.slotIdx, 10);
+    day.slots[slotIdx].text = e.target.value;
+    save();
+  }
+});
+
+document.getElementById("daysList").addEventListener("change", function(e) {
+  var dayCard = e.target.closest(".day");
+  if (!dayCard) return;
+  var dayIdx = parseInt(dayCard.dataset.index, 10);
+  var day = plan[dayIdx];
+  if (!day) return;
+
+  if (e.target.dataset.locIdx !== undefined) {
+    var slotIdx = parseInt(e.target.dataset.locIdx, 10);
+    day.slots[slotIdx].loc = e.target.value;
+    render();
+    save();
+  }
+});
+
+document.getElementById("daysList").addEventListener("click", function(e) {
+  var target = e.target;
+  if (target.tagName === "A") return;
+
+  var dayCard = target.closest(".day");
+  if (!dayCard) return;
+  var dayIdx = parseInt(dayCard.dataset.index, 10);
+  var day = plan[dayIdx];
+  if (!day) return;
+
+  // Day move up/down
+  var moveBtn = target.closest("[data-day-move]");
+  if (moveBtn) {
+    var direction = moveBtn.dataset.dayMove;
+    if (direction === "up") moveDay(dayIdx, dayIdx - 1);
+    else if (direction === "down") moveDay(dayIdx, dayIdx + 1);
     return;
   }
-  document.getElementById("diag").textContent = "";
-  var labels = ["Vormittag","Nachmittag","Abend"];
-  shown.forEach(function(d){
-    var el = document.createElement("article");
-    el.className = "day";
-    el.dataset.id = d.id;
-    var slotsHtml = "";
-    for(var i=0;i<3;i++){
-      var slot = d.slots[i];
-      var locName = slot.loc || "";
-      var dist = distanceLabel(locName);
-      var optionsHtml = '<option value="">-- kein Ort --</option>';
-      LOCATION_NAMES.forEach(function(name){
-        optionsHtml += '<option value="' + esc(name) + '"' + (name === locName ? ' selected' : '') + '>' + esc(name) + '</option>';
-      });
-      var linkHtml = locName ? '<a class="naverlink" target="_blank" rel="noopener" href="' + naverUrl(locName) + '">Naver Map</a>' : '';
-      var distHtml = dist ? '<div class="distance">' + esc(dist.main) + (dist.sub ? ' <span class="sub">' + esc(dist.sub) + '</span>' : '') + '</div>' : '';
-      slotsHtml += '<div class="slot"><h3>' + labels[i] + '</h3>' +
-        '<textarea data-slot="' + i + '">' + esc(slot.text || "") + '</textarea>' +
-        '<div class="locrow">' +
-          '<select data-locslot="' + i + '">' + optionsHtml + '</select>' +
-          linkHtml +
-        '</div>' +
-        distHtml +
-        '<div class="actions">' +
-          '<button data-move="up" data-slot-ref="' + i + '">Hoch</button>' +
-          '<button data-move="down" data-slot-ref="' + i + '">Runter</button>' +
-          '<button class="remove" data-clear="' + i + '">Leeren</button>' +
-        '</div></div>';
-    }
-    el.innerHTML =
-      '<div class="day-head">' +
-        '<div><h2>' + esc(d.date) + ' - ' + esc(d.title) + '</h2>' +
-        '<small>' + (d.type === "fixed" ? "Fixer Programmpunkt" : "Flexibel bearbeitbar") + '</small></div>' +
-        '<span class="badge ' + (d.type === "fixed" ? "fixed" : "") + '">' + (d.type === "fixed" ? "FIX" : "FLEX") + '</span>' +
-      '</div>' +
-      '<div class="slots">' + slotsHtml + '</div>';
-    out.appendChild(el);
-  });
-}
 
-function updateStats(){
+  // Toggle type (fixed / flex)
+  var typeBadge = target.closest("[data-toggle-type]");
+  if (typeBadge) {
+    day.type = (day.type === "fixed" ? "flex" : "fixed");
+    render();
+    save();
+    return;
+  }
+
+  // Delete day
+  var delBtn = target.closest("[data-day-delete]");
+  if (delBtn) {
+    if (confirm("Möchtest du Tag " + (dayIdx + 1) + " (" + day.title + ") wirklich löschen?")) {
+      plan.splice(dayIdx, 1);
+      reassignDates();
+      save();
+      render();
+    }
+    return;
+  }
+
+  // Clear slot
+  var clearBtn = target.closest("[data-slot-clear]");
+  if (clearBtn) {
+    var sIdx = parseInt(clearBtn.dataset.slotClear, 10);
+    day.slots[sIdx].text = "";
+    day.slots[sIdx].loc = "";
+    render();
+    save();
+    return;
+  }
+
+  // Shift slot within day
+  var shiftBtn = target.closest("[data-slot-shift]");
+  if (shiftBtn) {
+    var sIdx = parseInt(shiftBtn.dataset.slot, 10);
+    var targetSIdx = shiftBtn.dataset.slotShift === "up" ? Math.max(0, sIdx - 1) : Math.min(2, sIdx + 1);
+    var temp = day.slots[sIdx];
+    day.slots[sIdx] = day.slots[targetSIdx];
+    day.slots[targetSIdx] = temp;
+    render();
+    save();
+    return;
+  }
+});
+
+// Home selection change
+homeSelect.onchange = function() {
+  save();
+  render();
+};
+
+// Filter change
+document.getElementById("filter").onchange = render;
+
+// Notes input
+notesEl.oninput = save;
+
+// Reset button
+document.getElementById("resetBtn").onclick = function() {
+  if (confirm("Gesamten Plan wirklich auf die Standard-Reiseroute zurücksetzen?")) {
+    plan = clone(DEFAULT_PLAN);
+    reassignDates();
+    save();
+    render();
+  }
+};
+
+// Add day
+document.getElementById("addDayBtn").onclick = function() {
+  var nextDayOffset = plan.length;
+  var newId = plan.reduce(function(max, d) { return Math.max(max, d.id || 0); }, 0) + 1;
+  plan.push({
+    id: newId,
+    title: "Neuer Ausflug / Freier Tag",
+    type: "flex",
+    slots: [
+      { text: "", loc: "" },
+      { text: "", loc: "" },
+      { text: "", loc: "" }
+    ]
+  });
+  reassignDates();
+  save();
+  render();
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+};
+
+// Update stats
+function updateStats() {
   document.getElementById("dayCount").textContent = plan.length;
-  document.getElementById("fixedCount").textContent = plan.filter(function(d){return d.type === "fixed";}).length;
+  document.getElementById("fixedCount").textContent = plan.filter(function(d) { return d.type === "fixed"; }).length;
   var total = plan.length * 3;
-  var filled = plan.reduce(function(n,d){
-    return n + d.slots.filter(function(s){ return s.text && s.text.trim(); }).length;
+  var filled = plan.reduce(function(sum, d) {
+    return sum + d.slots.filter(function(s) { return s.text && s.text.trim().length > 0; }).length;
   }, 0);
   document.getElementById("filledCount").textContent = filled;
-  document.getElementById("progress").textContent = total ? Math.round(filled/total*100) + "%" : "0%";
+  document.getElementById("progress").textContent = total ? Math.round((filled / total) * 100) + "%" : "0%";
 }
 
-document.getElementById("days").addEventListener("input", function(e){
-  if(e.target.tagName !== "TEXTAREA") return;
-  var dayEl = e.target.closest(".day");
-  var day = plan.find(function(d){ return String(d.id) === dayEl.dataset.id; });
-  if(day) day.slots[e.target.dataset.slot].text = e.target.value;
-  save();
-});
-
-document.getElementById("days").addEventListener("change", function(e){
-  if(e.target.tagName !== "SELECT") return;
-  var dayEl = e.target.closest(".day");
-  var day = plan.find(function(d){ return String(d.id) === dayEl.dataset.id; });
-  if(day) day.slots[e.target.dataset.locslot].loc = e.target.value;
-  render(); save();
-});
-
-document.getElementById("days").addEventListener("click", function(e){
-  var b = e.target;
-  if(b.tagName === "A") return;
-  var dayEl = b.closest(".day");
-  if(!dayEl) return;
-  var day = plan.find(function(d){ return String(d.id) === dayEl.dataset.id; });
-  if(!day) return;
-  if(b.dataset.clear !== undefined){
-    day.slots[b.dataset.clear].text = "";
-    render(); save();
-  }
-  if(b.dataset.move){
-    var j = parseInt(b.dataset.slotRef, 10);
-    var k = b.dataset.move === "up" ? Math.max(0, j-1) : Math.min(2, j+1);
-    var tmp = day.slots[j];
-    day.slots[j] = day.slots[k];
-    day.slots[k] = tmp;
-    render(); save();
-  }
-});
-
-document.getElementById("filter").onchange = render;
-document.getElementById("notes").oninput = save;
-homeSelect.onchange = function(){ render(); save(); };
-
-document.getElementById("reset").onclick = function(){
-  if(confirm("Den aktuellen Plan wirklich zuruecksetzen?")){
-    plan = clone(DEFAULT_PLAN);
-    render(); save();
-  }
-};
-
-document.getElementById("addDay").onclick = function(){
-  var maxId = plan.reduce(function(m,d){ return Math.max(m, d.id); }, 0);
-  plan.push({id: maxId+1, date: "Neuer Tag", title: "Neuer Programmpunkt", type: "flex",
-    slots: [{text:"",loc:""},{text:"",loc:""},{text:"",loc:""}]});
-  render(); save();
-};
-
+// Initial render
 render();
 updateStats();
 </script>
