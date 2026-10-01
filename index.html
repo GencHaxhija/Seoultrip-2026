@@ -1,1440 +1,190 @@
-<!doctype html>
-<html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Seoul 2026 – Reise Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <style>
-    :root {
-      --bg: #0b0f19;
-      --surface: #131b2e;
-      --surface-card: #182238;
-      --surface-hover: #1f2c49;
-      --surface-input: #0e1526;
-      --border: rgba(255, 255, 255, 0.09);
-      --border-focus: #4f7fff;
-      --ink: #f1f5f9;
-      --muted: #94a3b8;
-      --accent: #4f7fff;
-      --accent-glow: rgba(79, 127, 255, 0.25);
-      --fixed-bg: rgba(245, 158, 11, 0.12);
-      --fixed-text: #fbbf24;
-      --fixed-border: rgba(245, 158, 11, 0.35);
-      --flex-bg: rgba(59, 130, 246, 0.12);
-      --flex-text: #60a5fa;
-      --flex-border: rgba(59, 130, 246, 0.3);
-      --naver: #03c75a;
-      --naver-hover: #02b350;
-      --danger: #ef4444;
-      --danger-hover: #dc2626;
-      --home-gold: #f59e0b;
-      --radius: 16px;
-      --radius-sm: 10px;
-      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * { box-sizing: border-box; }
-    
-    body {
-      margin: 0;
-      background-color: var(--bg);
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(79, 127, 255, 0.1) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
-      background-attachment: fixed;
-      color: var(--ink);
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      font-size: 15px;
-      line-height: 1.5;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    h1, h2, h3, h4 {
-      font-family: 'Outfit', sans-serif;
-      margin: 0;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    /* HEADER */
-    header {
-      background: rgba(19, 27, 46, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-      padding: 24px 5vw;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-    .header-inner {
-      max-width: 1320px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .title-group h1 {
-      font-size: 26px;
-      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .title-group p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .header-tag {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 3px 10px;
-      font-size: 12px;
-      color: #cbd5e1;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* BUTTONS */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      color: var(--ink);
-      padding: 10px 18px;
-      border-radius: var(--radius-sm);
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      user-select: none;
-    }
-    .btn:hover {
-      background: var(--surface-hover);
-      border-color: rgba(255, 255, 255, 0.2);
-      transform: translateY(-1px);
-    }
-    .btn-primary {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-      box-shadow: 0 4px 14px var(--accent-glow);
-    }
-    .btn-primary:hover {
-      background: #3d6df2;
-      border-color: #3d6df2;
-      box-shadow: 0 6px 20px var(--accent-glow);
-    }
-    .btn-naver {
-      background: var(--naver);
-      border-color: var(--naver);
-      color: #fff;
-      text-decoration: none;
-      padding: 6px 12px;
-      font-size: 13px;
-      border-radius: 8px;
-    }
-    .btn-naver:hover {
-      background: var(--naver-hover);
-      border-color: var(--naver-hover);
-    }
-    .btn-danger {
-      color: var(--danger);
-    }
-    .btn-danger:hover {
-      background: rgba(239, 68, 68, 0.12);
-      border-color: rgba(239, 68, 68, 0.3);
-    }
-    .btn-sm {
-      padding: 6px 10px;
-      font-size: 12px;
-      border-radius: 8px;
-    }
-
-    /* WRAPPER */
-    .wrap {
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: 24px 5vw 60px;
-    }
-
-    /* HOME BAR & ACCOMMODATION */
-    .homebar {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 22px;
-      margin-bottom: 22px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
-    }
-    .homebar-icon {
-      font-size: 22px;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .homebar-info {
-      flex: 1;
-      min-width: 240px;
-    }
-    .homebar-info label {
-      display: block;
-      font-weight: 700;
-      font-size: 14px;
-      color: #f1f5f9;
-      margin-bottom: 2px;
-    }
-    .homebar-info .hint {
-      font-size: 12px;
-      color: var(--muted);
-      margin: 0;
-    }
-    .homebar select {
-      background: var(--surface-input);
-      color: var(--ink);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
-      font: inherit;
-      font-size: 14px;
-      outline: none;
-      min-width: 220px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .homebar select:focus {
-      border-color: var(--border-focus);
-    }
-
-    /* MAP CONTAINER */
-    .map-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      transition: var(--transition);
-    }
-    .map-header {
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--surface-card);
-      border-bottom: 1px solid var(--border);
-    }
-    .map-header h3 {
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    #map {
-      width: 100%;
-      height: 440px;
-      background: #0f172a;
-    }
-
-    /* CONTROLS BAR */
-    .controls-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 22px;
-      flex-wrap: wrap;
-    }
-    .filters-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .filter-select {
-      background: var(--surface);
-      color: var(--ink);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
-      font: inherit;
-      font-size: 14px;
-      outline: none;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .filter-select:focus {
-      border-color: var(--border-focus);
-    }
-
-    /* STATS BAR */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 26px;
-    }
-    .stat {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 20px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
-    .stat strong {
-      display: block;
-      font-family: 'Outfit', sans-serif;
-      font-size: 28px;
-      font-weight: 700;
-      line-height: 1.1;
-      margin-bottom: 4px;
-      background: linear-gradient(135deg, #ffffff, #cbd5e1);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .stat span {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    /* DAY CARD */
-    .day {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 22px;
-      margin-bottom: 20px;
-      transition: var(--transition);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-      position: relative;
-    }
-    .day:hover {
-      border-color: rgba(255, 255, 255, 0.16);
-    }
-    .day.dragging {
-      opacity: 0.4;
-      border: 2px dashed var(--accent);
-      transform: scale(0.98);
-    }
-    .day.drag-over {
-      border-top: 3px solid var(--accent);
-      box-shadow: 0 -8px 24px var(--accent-glow);
-    }
-
-    .day-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 16px;
-      margin-bottom: 18px;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .day-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-      min-width: 280px;
-    }
-    .drag-handle {
-      cursor: grab;
-      color: var(--muted);
-      font-size: 20px;
-      padding: 4px 8px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      user-select: none;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .drag-handle:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-    .drag-handle:active {
-      cursor: grabbing;
-    }
-    .day-index-badge {
-      background: rgba(255, 255, 255, 0.08);
-      color: #f1f5f9;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 8px;
-      white-space: nowrap;
-    }
-    .day-title-inputs {
-      flex: 1;
-    }
-    .day-date-display {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 2px;
-    }
-    .day-title-input {
-      background: transparent;
-      border: 1px solid transparent;
-      color: #fff;
-      font-family: 'Outfit', sans-serif;
-      font-size: 19px;
-      font-weight: 700;
-      width: 100%;
-      border-radius: 6px;
-      padding: 2px 6px;
-      outline: none;
-      transition: var(--transition);
-    }
-    .day-title-input:focus {
-      background: var(--surface-input);
-      border-color: var(--border-focus);
-    }
-
-    .day-head-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border-radius: 999px;
-      padding: 4px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      cursor: pointer;
-      user-select: none;
-      border: 1px solid transparent;
-      transition: var(--transition);
-    }
-    .badge.fixed {
-      background: var(--fixed-bg);
-      color: var(--fixed-text);
-      border-color: var(--fixed-border);
-    }
-    .badge.flex {
-      background: var(--flex-bg);
-      color: var(--flex-text);
-      border-color: var(--flex-border);
-    }
-    .day-nav-btns {
-      display: flex;
-      gap: 6px;
-    }
-
-    /* SLOTS GRID */
-    .slots {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-    .slot {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: var(--transition);
-    }
-    .slot:hover {
-      border-color: rgba(255, 255, 255, 0.16);
-    }
-    .slot-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .slot-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .slot textarea {
-      width: 100%;
-      flex: 1;
-      min-height: 85px;
-      resize: vertical;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 8px;
-      outline: none;
-      background: var(--surface-input);
-      font-family: inherit;
-      font-size: 14px;
-      color: var(--ink);
-      padding: 10px;
-      line-height: 1.45;
-      transition: var(--transition);
-    }
-    .slot textarea:focus {
-      border-color: var(--border-focus);
-      background: #0b1120;
-    }
-
-    .locrow {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .locrow select {
-      flex: 1;
-      min-width: 140px;
-      background: var(--surface-input);
-      color: var(--ink);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 13px;
-      outline: none;
-      cursor: pointer;
-    }
-    .locrow select:focus {
-      border-color: var(--border-focus);
-    }
-
-    .distance-badge {
-      font-size: 12px;
-      color: #34d399;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      border-radius: 8px;
-      padding: 6px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-    .distance-badge .sub {
-      color: #94a3b8;
-      font-weight: 400;
-    }
-
-    .slot-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 6px;
-      margin-top: 4px;
-    }
-    .slot-shift-btns {
-      display: flex;
-      gap: 4px;
-    }
-
-    /* NOTES SECTION */
-    .notes-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 22px;
-      margin-top: 30px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-    }
-    .notes-section h2 {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-    .notes-section p {
-      color: var(--muted);
-      font-size: 14px;
-      margin: 0 0 14px;
-    }
-    .notes-section textarea {
-      width: 100%;
-      min-height: 140px;
-      background: var(--surface-input);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 14px;
-      font-family: inherit;
-      font-size: 14px;
-      color: var(--ink);
-      line-height: 1.5;
-      outline: none;
-      resize: vertical;
-    }
-    .notes-section textarea:focus {
-      border-color: var(--border-focus);
-    }
-
-    /* MAP POPUP STYLES */
-    .leaflet-popup-content-wrapper {
-      background: #182238;
-      color: #f1f5f9;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    .leaflet-popup-tip {
-      background: #182238;
-    }
-    .popup-content h4 {
-      font-size: 15px;
-      margin-bottom: 2px;
-      color: #fff;
-    }
-    .popup-content p {
-      font-size: 12px;
-      color: #94a3b8;
-      margin: 0 0 10px;
-    }
-
-    .empty-state {
-      padding: 40px;
-      text-align: center;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 960px) {
-      .slots { grid-template-columns: 1fr; }
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .header-inner { flex-direction: column; align-items: flex-start; }
-      .header-actions { width: 100%; justify-content: space-between; }
-    }
-    @media (max-width: 600px) {
-      .stats { grid-template-columns: 1fr; }
-      .day-head { flex-direction: column; align-items: flex-start; }
-      .day-head-meta { width: 100%; justify-content: space-between; }
-    }
-  </style>
-</head>
-<body>
-
-<header>
-  <div class="header-inner">
-    <div class="title-group">
-      <h1>🇰🇷 Seoul 2026 Reise-Planer</h1>
-      <p>
-        <span>5. – 15. Oktober 2026</span>
-        <span class="header-tag">3 Personen</span>
-        <span class="header-tag">Basis: Seoul</span>
-      </p>
-    </div>
-    <div class="header-actions">
-      <button class="btn" id="toggleMapBtn">🗺️ Karte anzeigen</button>
-      <button class="btn btn-primary" id="addDayBtn">+ Tag anfügen</button>
-    </div>
-  </div>
-</header>
-
-<main class="wrap">
-
-  <!-- HOME STANDORT / UNTERKUNFT -->
-  <div class="homebar">
-    <div class="homebar-icon">🏠</div>
-    <div class="homebar-info">
-      <label for="homeSelect">Heimstandort & Unterkunft</label>
-      <p class="hint">Referenzpunkt für automatische ÖPNV-Fahrzeit- und Distanzschätzungen.</p>
-    </div>
-    <select id="homeSelect"></select>
-  </div>
-
-  <!-- INTERAKTIVE KARTE (TOGGLEABLE) -->
-  <section class="map-section" id="mapContainer" style="display: none;">
-    <div class="map-header">
-      <h3>📍 Interaktive Seoul-Karte <small style="color:var(--muted); font-size:13px; font-weight:normal;">(Alle geplanten Stationen & Unterkunft)</small></h3>
-      <div style="display:flex; gap:8px;">
-        <button class="btn btn-sm" id="centerHomeBtn">Zu Unterkunft</button>
-        <button class="btn btn-sm" id="closeMapBtn">Schliessen ✕</button>
-      </div>
-    </div>
-    <div id="map"></div>
-  </section>
-
-  <!-- CONTROLS & FILTER -->
-  <div class="controls-bar">
-    <div class="filters-group">
-      <select id="filter" class="filter-select">
-        <option value="all">Alle Tage anzeigen</option>
-        <option value="fixed">Nur fixe Programmpunkte (Fix)</option>
-        <option value="flex">Nur flexible Tage (Flex)</option>
-      </select>
-      <span style="font-size:13px; color:var(--muted);">
-        💡 <strong>Tipp:</strong> Ziehe Tage am Griff <code>⋮⋮</code> oder nutze <code>▲/▼</code>, um sie zu verschieben. Die Daten passen sich automatisch an!
-      </span>
-    </div>
-    <button class="btn btn-danger btn-sm" id="resetBtn">Plan zurücksetzen</button>
-  </div>
-
-  <!-- STATS -->
-  <div class="stats">
-    <div class="stat">
-      <strong id="dayCount">0</strong>
-      <span>Tage im Reiseplan</span>
-    </div>
-    <div class="stat">
-      <strong id="fixedCount">0</strong>
-      <span>Fixe Programmpunkte</span>
-    </div>
-    <div class="stat">
-      <strong id="filledCount">0</strong>
-      <span>Geplante Zeitblöcke</span>
-    </div>
-    <div class="stat">
-      <strong id="progress">0%</strong>
-      <span>Reise-Fortschritt</span>
-    </div>
-  </div>
-
-  <!-- DAYS CONTAINER -->
-  <section id="daysList"></section>
-
-  <!-- GEMEINSAME NOTIZEN -->
-  <section class="notes-section">
-    <h2>📝 Gemeinsame Reise-Notizen</h2>
-    <p>Ideen, Restaurant-Empfehlungen, Clubnächte, wichtige Adressen und Notizen für die Gruppe.</p>
-    <textarea id="notes" placeholder="Hier gemeinsame Notizen, Packtipps, Restaurant-Links oder offene Punkte eintragen ..."></textarea>
-  </section>
-
+<!DOCTYPE html>
+<html lang="de-CH"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seoul 2026 – Reiseplaner</title>
+<style>
+/* ===== Dunkles Dashboard-Design ===== */
+:root{--bg:#0f1218;--card:#181d27;--card2:#202636;--line:#2a3142;--tx:#e8ecf3;--mu:#8b95a7;--ac:#ff6b81;--bl:#4cc9f0;--ok:#4ade80;--wa:#fbbf24}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:84px}
+header{padding:18px 16px 8px;max-width:980px;margin:auto}h1{margin:0;font-size:1.5rem}.sub{color:var(--mu);font-size:.9rem}
+main{max-width:980px;margin:auto;padding:0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0}
+.card>summary,.card h3{font-weight:700;cursor:pointer}.card h3{margin:0 0 8px;font-size:1rem}
+button,.btn,select,input,textarea{font:inherit;color:var(--tx)}
+button,.btn{min-height:46px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card2);cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+button:hover,.btn:hover{border-color:var(--bl)}button.pri{background:var(--ac);border-color:var(--ac);color:#111;font-weight:700}button.dan{color:#ff8a8a}button:disabled{opacity:.4}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input,select,textarea{width:100%;min-height:46px;padding:10px 12px;background:#0f1218;border:1px solid var(--line);border-radius:10px;font-size:16px}textarea{min-height:80px;resize:vertical}
+label{display:block;font-size:.8rem;color:var(--mu);margin:10px 0 4px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0}.chip{flex:0 0 auto;min-height:42px;padding:6px 12px}.chip.on{background:var(--bl);color:#0b1220;border-color:var(--bl);font-weight:700}
+.day{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:14px 0;padding:14px}
+.dh{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.dn{color:var(--ac);font-weight:700;font-size:.85rem}.dd{color:var(--mu);font-size:.9rem}.day h2{margin:2px 0 0;font-size:1.25rem}
+.sum{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.pill{background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:.8rem;color:var(--mu)}
+.pill.fix{color:var(--ac);border-color:var(--ac)}.pill.flex{color:var(--bl);border-color:var(--bl)}
+.sec{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.sh{display:flex;justify-content:space-between;align-items:center;gap:8px}.sh b{font-size:1.05rem}
+.list{min-height:12px}.list.over{outline:2px dashed var(--bl);border-radius:10px}
+.act{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}.act.warn{border-color:var(--wa)}.act.drag{opacity:.4}
+.at{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.time{background:#0f1218;border:1px solid var(--bl);color:var(--bl);border-radius:8px;padding:2px 8px;font-weight:700;white-space:nowrap}
+.atit{font-weight:700}.pl{color:var(--mu);font-size:.9rem}.nt{font-size:.9rem;margin-top:4px;white-space:pre-wrap}
+.wr{background:#3a2d0a;color:var(--wa);border:1px solid var(--wa);border-radius:8px;padding:6px 10px;margin:8px 0;font-size:.9rem}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tools button,.tools a{min-height:40px;padding:4px 10px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0b0e14;border-top:1px solid var(--line);padding:8px;display:flex;gap:8px;justify-content:center;z-index:5}.bar button{flex:1;max-width:220px}
+.ov{position:fixed;inset:0;background:#000a;display:flex;align-items:flex-end;justify-content:center;z-index:10}.hidden{display:none}
+.sheet{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px}@media(min-width:700px){.ov{align-items:center}.sheet{border-radius:18px}body{padding-bottom:70px}}
+#toast{position:fixed;top:10px;right:10px;background:var(--ok);color:#06220f;padding:8px 14px;border-radius:10px;font-weight:700;z-index:20;opacity:0;transition:.3s;pointer-events:none}#toast.on{opacity:1}#toast.err{background:#ff6b6b;color:#220}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.food{border-top:1px solid var(--line);padding:8px 0}.food a{color:var(--bl)}
+</style></head><body>
+<header><h1>🇰🇷 Seoul 2026</h1><div class="sub" id="hdr"></div></header>
+<div id="toast"></div>
+<main>
+<div class="card"><h3>Ansicht</h3><div class="row"><button data-a="vall">Alle Tage</button><button data-a="vone">Einzelner Tag</button><button class="pri" data-a="addday">+ Tag</button></div><div class="chips" id="chips"></div></div>
+<details class="card"><summary>Daten (Export / Import)</summary>
+<p class="sub" id="dstat"></p>
+<div class="row"><button class="pri" data-a="expjson">⬇ Export (JSON)</button><button data-a="imp">⬆ Import (JSON)</button><button data-a="exptxt">Text-Export</button><button data-a="expcsv">CSV-Export</button><button data-a="share" id="shareBtn">Teilen</button><button data-a="legacy" id="legBtn" class="hidden">Alt-Backup laden</button><button class="dan" data-a="reset">Standardplan</button></div>
+<p class="sub">Tipp: Am Computer exportieren, Datei per AirDrop/Mail/Cloud aufs Handy schicken und dort importieren.</p>
+<input type="file" id="file" accept=".json,application/json" class="hidden"></details>
+<div id="days"></div>
+<details class="card"><summary>🍜 Essen, das wir probieren müssen (DE / 한국어)</summary><p class="sub">♥ = unbedingt probieren. Schärfe ist eine grobe Einschätzung.</p><div id="food"></div></details>
 </main>
-
+<div class="bar"><button data-a="prev">‹ Zurück</button><button data-a="vall">Alle</button><button data-a="next">Weiter ›</button></div>
+<div class="ov hidden" id="ov"><div class="sheet" id="sheet"></div></div>
 <script>
-// ==========================================
-// 1. LOCATIONS & METADATA
-// ==========================================
-var LOCATIONS = {
-  "Hongdae": { "query": "Hongik University Station", "district": "Mapo-gu", "coords": [37.5563, 126.9236] },
-  "Yeonnam-dong": { "query": "Yeonnam-dong Gyeongui Line Forest Park", "district": "Mapo-gu", "coords": [37.5615, 126.9255] },
-  "Gyeongbokgung Palace": { "query": "Gyeongbokgung Palace", "district": "Jongno-gu", "coords": [37.5796, 126.9770] },
-  "Bukchon Hanok Village": { "query": "Bukchon Hanok Village", "district": "Jongno-gu", "coords": [37.5826, 126.9832] },
-  "Insadong": { "query": "Insadong-gil", "district": "Jongno-gu", "coords": [37.5740, 126.9857] },
-  "Ikseondong": { "query": "Ikseondong Hanok Village", "district": "Jongno-gu", "coords": [37.5731, 126.9908] },
-  "Jongno": { "query": "Jongno 3-ga Station", "district": "Jongno-gu", "coords": [37.5704, 126.9910] },
-  "Euljiro": { "query": "Euljiro 3-ga Station", "district": "Jung-gu", "coords": [37.5663, 126.9910] },
-  "Changdeokgung Palace": { "query": "Changdeokgung Palace", "district": "Jongno-gu", "coords": [37.5794, 126.9910] },
-  "Gwangjang Market": { "query": "Gwangjang Market", "district": "Jongno-gu", "coords": [37.5701, 126.9994] },
-  "Dongdaemun Design Plaza": { "query": "Dongdaemun Design Plaza", "district": "Jung-gu", "coords": [37.5665, 127.0092] },
-  "Itaewon": { "query": "Itaewon Station", "district": "Yongsan-gu", "coords": [37.5347, 126.9947] },
-  "DMZ Imjingak": { "query": "Imjingak Pyeonghwa-Nuri Park", "district": "Paju-si", "coords": [37.8894, 126.7377] },
-  "Namsan Seoul Tower": { "query": "N Seoul Tower", "district": "Yongsan-gu", "coords": [37.5512, 126.9882] },
-  "Myeongdong": { "query": "Myeongdong Station", "district": "Jung-gu", "coords": [37.5636, 126.9834] },
-  "Namdaemun Market": { "query": "Namdaemun Market", "district": "Jung-gu", "coords": [37.5599, 126.9773] },
-  "Seoul World Cup Stadium": { "query": "Seoul World Cup Stadium", "district": "Mapo-gu", "coords": [37.5683, 126.8969] },
-  "Mangwon Market": { "query": "Mangwon Traditional Market", "district": "Mapo-gu", "coords": [37.5559, 126.9020] },
-  "Hwaseong Fortress Suwon": { "query": "Hwaseong Fortress Suwon", "district": "Suwon-si", "coords": [37.2860, 127.0143] },
-  "Haenggung-dong Suwon": { "query": "Suwon Hwaseong Haenggung Palace", "district": "Suwon-si", "coords": [37.2836, 127.0092] },
-  "Seoul Forest": { "query": "Seoul Forest Park", "district": "Seongdong-gu", "coords": [37.5445, 127.0374] },
-  "Seongsu-dong": { "query": "Seongsu Station", "district": "Seongdong-gu", "coords": [37.5445, 127.0559] },
-  "Gangnam": { "query": "Gangnam Station", "district": "Gangnam-gu", "coords": [37.4979, 127.0276] },
-  "Hannam-dong": { "query": "Hannam-dong", "district": "Yongsan-gu", "coords": [37.5345, 127.0009] },
-  "Incheon Chinatown": { "query": "Incheon Chinatown", "district": "Incheon", "coords": [37.4738, 126.6217] },
-  "Nami Island": { "query": "Nami Island", "district": "Chuncheon-si", "coords": [37.7904, 127.5262] },
-  "Garden of Morning Calm": { "query": "The Garden of Morning Calm", "district": "Gapyeong-gun", "coords": [37.7963, 127.3465] },
-  "Han River Banpo": { "query": "Banpo Hangang Park", "district": "Seocho-gu", "coords": [37.5133, 127.0000] }
-};
-
-var LOCATION_NAMES = Object.keys(LOCATIONS).sort();
-
-// Startdatum des Seoul-Trips: Montag, 5. Oktober 2026
-var START_YEAR = 2026;
-var START_MONTH = 9; // 0-indexed -> 9 = Oktober
-var START_DAY = 5;
-var WEEKDAYS_DE = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-var MONTHS_DE = ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sept.", "Okt.", "Nov.", "Dez."];
-
-function getFormattedDate(offsetDays) {
-  var d = new Date(START_YEAR, START_MONTH, START_DAY + offsetDays);
-  var wday = WEEKDAYS_DE[d.getDay()];
-  var dayNum = d.getDate();
-  var monthName = MONTHS_DE[d.getMonth()];
-  return wday + ", " + dayNum + ". " + monthName;
-}
-
-// ==========================================
-// 2. DEFAULT ITINERARY DATA
-// ==========================================
-var DEFAULT_PLAN = [
-  {
-    id: 1, title: "Ankunftstag – Hongdae", type: "flex",
-    slots: [
-      { text: "Ankommen, Einreise, Gepäck und Fahrt zur Unterkunft.", loc: "" },
-      { text: "Check-in und Pause. Eigenes Programm in Hongdae; optional Yeonnam-dong.", loc: "Hongdae" },
-      { text: "Gemeinsames Abendessen in Hongdae; Street Food; optionale erste Clubnacht.", loc: "Hongdae" }
-    ]
-  },
-  {
-    id: 2, title: "Paläste und traditionelles Seoul", type: "flex",
-    slots: [
-      { text: "Frühstück; Gyeongbokgung Palace; Bukchon Hanok Village.", loc: "Gyeongbokgung Palace" },
-      { text: "Insadong; traditionelles Mittagessen; Ikseondong und Cafés.", loc: "Insadong" },
-      { text: "Koreanisches BBQ; Jongno oder Euljiro; optionale Clubnacht.", loc: "Jongno" }
-    ]
-  },
-  {
-    id: 3, title: "Baseball oder Dongdaemun", type: "flex",
-    slots: [
-      { text: "Changdeokgung oder Gyeongbokgung; Mittagessen in Jongno.", loc: "Changdeokgung Palace" },
-      { text: "Baseball vorbereiten und zum Stadion fahren; alternativ Gwangjang Market und DDP.", loc: "Gwangjang Market" },
-      { text: "Baseballspiel; alternativ Abendessen in Euljiro und Itaewon-Bar.", loc: "Dongdaemun Design Plaza" }
-    ]
-  },
-  {
-    id: 4, title: "DMZ-Tour", type: "fixed",
-    slots: [
-      { text: "Früher Start; Frühstück zum Mitnehmen; organisierte DMZ-Tour. Originalpass mitnehmen!", loc: "DMZ Imjingak" },
-      { text: "Fortsetzung der DMZ-Tour; Rückkehr nach Seoul am späten Nachmittag.", loc: "DMZ Imjingak" },
-      { text: "Ruhiges Abendessen in Itaewon; entspannte Bar.", loc: "Itaewon" }
-    ]
-  },
-  {
-    id: 5, title: "Namsan, Shopping und Nachtleben", type: "flex",
-    slots: [
-      { text: "Namsan Seoul Tower oder Namsan-Wanderung; Mittagessen in Myeongdong.", loc: "Namsan Seoul Tower" },
-      { text: "Myeongdong Shopping; Namdaemun Market; Pause.", loc: "Myeongdong" },
-      { text: "Abendessen in Itaewon; Rooftop-Bar und Clubnacht.", loc: "Itaewon" }
-    ]
-  },
-  {
-    id: 6, title: "FC Seoul gegen Jeju SK", type: "fixed",
-    slots: [
-      { text: "Frühstück; Mangwon oder Han River; frühes Mittagessen.", loc: "Mangwon Market" },
-      { text: "Zum Seoul World Cup Stadium; Spiel ab ca. 14:00 Uhr.", loc: "Seoul World Cup Stadium" },
-      { text: "Abendessen in Hongdae; Street Performance und grosse Clubnacht.", loc: "Hongdae" }
-    ]
-  },
-  {
-    id: 7, title: "Suwon und Hwaseong-Festung", type: "flex",
-    slots: [
-      { text: "Fahrt nach Suwon; Hwaseong-Festung und Stadtmauer.", loc: "Hwaseong Fortress Suwon" },
-      { text: "Mittagessen; Haenggung-dong; Cafés und Geschäfte.", loc: "Haenggung-dong Suwon" },
-      { text: "Rückkehr; Abendessen in Itaewon; Karaoke oder ruhiger Abend.", loc: "Itaewon" }
-    ]
-  },
-  {
-    id: 8, title: "Seongsu und Seoul Forest", type: "flex",
-    slots: [
-      { text: "Spätes Frühstück; Seoul Forest Spaziergang.", loc: "Seoul Forest" },
-      { text: "Seongsu: Cafés, Concept Stores, Pop-ups und Streetwear.", loc: "Seongsu-dong" },
-      { text: "Gangnam oder Hannam; Rooftop-Bar; optional Clubnacht.", loc: "Gangnam" }
-    ]
-  },
-  {
-    id: 9, title: "Incheon oder Nami Island", type: "flex",
-    slots: [
-      { text: "OPTION A: Incheon Chinatown. OPTION B: früher Start nach Nami Island.", loc: "Incheon Chinatown" },
-      { text: "Incheon: Jayu Park und Open Port. Oder Nami Island und Garden of Morning Calm.", loc: "Nami Island" },
-      { text: "Rückkehr; Abendessen und Bar oder Erholung.", loc: "Itaewon" }
-    ]
-  },
-  {
-    id: 10, title: "Letzter Seoul-Tag", type: "flex",
-    slots: [
-      { text: "Lieblingsort oder offene Sehenswürdigkeit nachholen.", loc: "" },
-      { text: "Letzte Einkäufe; Gepäck organisieren; Pause.", loc: "Myeongdong" },
-      { text: "Abschlussessen; Rooftop-Bar und letzter Spaziergang am Han River.", loc: "Han River Banpo" }
-    ]
-  },
-  {
-    id: 11, title: "Abreise", type: "fixed",
-    slots: [
-      { text: "Frühstück; Check-out; Gepäck und Flughafentransfer je nach Flugzeit.", loc: "" },
-      { text: "Flughafen und Check-in.", loc: "" },
-      { text: "Rückflug nach Hause.", loc: "" }
-    ]
-  }
-];
-
-// ==========================================
-// 3. STORAGE & STATE
-// ==========================================
-var STORAGE_KEY = "koreaPlan_v5";
-var NOTES_KEY = "koreaNotes_v5";
-var HOME_KEY = "koreaHome_v5";
-
-function clone(x) { return JSON.parse(JSON.stringify(x)); }
-
-// Reassign dates based on current array position
-function reassignDates() {
-  plan.forEach(function(d, index) {
-    d.date = getFormattedDate(index);
-    d.dayNumber = index + 1;
-  });
-}
-
-function loadPlan() {
-  try {
-    var raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("koreaPlan_v4");
-    if (!raw) {
-      var p = clone(DEFAULT_PLAN);
-      return p;
-    }
-    var parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || parsed.length === 0) return clone(DEFAULT_PLAN);
-    return parsed;
-  } catch(e) {
-    return clone(DEFAULT_PLAN);
-  }
-}
-
-var plan = loadPlan();
-reassignDates();
-
-var notesEl = document.getElementById("notes");
-notesEl.value = localStorage.getItem(NOTES_KEY) || localStorage.getItem("koreaNotes_v4") || "";
-
-var homeSelect = document.getElementById("homeSelect");
-var emptyOpt = document.createElement("option");
-emptyOpt.value = ""; emptyOpt.textContent = "-- Ort wählen --";
-homeSelect.appendChild(emptyOpt);
-LOCATION_NAMES.forEach(function(name) {
-  var opt = document.createElement("option");
-  opt.value = name;
-  opt.textContent = name + " (" + LOCATIONS[name].district + ")";
-  homeSelect.appendChild(opt);
-});
-homeSelect.value = localStorage.getItem(HOME_KEY) || localStorage.getItem("koreaHome_v4") || "Itaewon";
-
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
-  localStorage.setItem(NOTES_KEY, notesEl.value);
-  localStorage.setItem(HOME_KEY, homeSelect.value);
-  updateStats();
-  if (map) refreshMapMarkers();
-}
-
-// ==========================================
-// 4. DISTANCE & TRANSIT CALCULATION
-// ==========================================
-function haversine(a, b) {
-  var R = 6371;
-  var dLat = (b[0] - a[0]) * Math.PI / 180;
-  var dLon = (b[1] - a[1]) * Math.PI / 180;
-  var lat1 = a[0] * Math.PI / 180, lat2 = b[0] * Math.PI / 180;
-  var x = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  var c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
-  return R * c;
-}
-
-function estimateTransitMinutes(km) {
-  var accessMinutes = 8;
-  var speedKmh;
-  if (km <= 2) speedKmh = 14;
-  else if (km <= 6) speedKmh = 22;
-  else if (km <= 15) speedKmh = 32;
-  else if (km <= 40) speedKmh = 55;
-  else speedKmh = 90;
-  return Math.round(accessMinutes + (km / speedKmh) * 60);
-}
-
-function naverUrl(name) {
-  var loc = LOCATIONS[name];
-  if (!loc) return "https://map.naver.com/p/search/" + encodeURIComponent(name);
-  return "https://map.naver.com/p/search/" + encodeURIComponent(loc.query);
-}
-
-function distanceLabel(locName) {
-  var home = homeSelect.value;
-  if (!home || !locName || !LOCATIONS[home] || !LOCATIONS[locName]) return null;
-  if (home === locName) return { main: "🏠 Heimstandort", sub: "" };
-  var km = haversine(LOCATIONS[home].coords, LOCATIONS[locName].coords);
-  var minutes = estimateTransitMinutes(km);
-  return { main: "~" + minutes + " Min. ÖPNV", sub: "(" + km.toFixed(1) + " km Luftlinie)" };
-}
-
-function esc(s) {
-  return String(s || "").replace(/[&<>"']/g, function(c) {
-    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[c];
-  });
-}
-
-// ==========================================
-// 5. INTERACTIVE MAP (LEAFLET)
-// ==========================================
-var map = null;
-var markersLayer = null;
-
-function initMap() {
-  if (map) return;
-  var homeCoords = (homeSelect.value && LOCATIONS[homeSelect.value]) ? LOCATIONS[homeSelect.value].coords : [37.5563, 126.9800];
-  
-  map = L.map('map').setView(homeCoords, 12);
-  
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 19
-  }).addTo(map);
-
-  markersLayer = L.layerGroup().addTo(map);
-  refreshMapMarkers();
-}
-
-function refreshMapMarkers() {
-  if (!markersLayer) return;
-  markersLayer.clearLayers();
-
-  var home = homeSelect.value;
-  var bounds = [];
-
-  LOCATION_NAMES.forEach(function(name) {
-    var loc = LOCATIONS[name];
-    var isHome = (name === home);
-
-    // Check if this location is used in the plan
-    var usedInDays = [];
-    plan.forEach(function(d, dIdx) {
-      d.slots.forEach(function(s) {
-        if (s.loc === name) {
-          usedInDays.push("Tag " + (dIdx + 1) + " (" + d.date.split(",")[0] + ")");
-        }
-      });
-    });
-
-    var pinColor = isHome ? "#f59e0b" : (usedInDays.length > 0 ? "#4f7fff" : "#64748b");
-    var pinBorder = isHome ? "#fff" : "rgba(255,255,255,0.8)";
-    var iconSize = isHome ? 32 : (usedInDays.length > 0 ? 26 : 20);
-
-    var customIcon = L.divIcon({
-      className: 'custom-pin',
-      html: '<div style="' +
-        'width:' + iconSize + 'px; height:' + iconSize + 'px; ' +
-        'background:' + pinColor + '; ' +
-        'border: 2px solid ' + pinBorder + '; ' +
-        'border-radius: 50%; ' +
-        'display: flex; align-items: center; justify-content: center; ' +
-        'box-shadow: 0 3px 12px rgba(0,0,0,0.5); font-size:' + (isHome ? 15 : 12) + 'px;' +
-        '">' + (isHome ? '🏠' : (usedInDays.length > 0 ? '📍' : '•')) + '</div>',
-      iconSize: [iconSize, iconSize],
-      iconAnchor: [iconSize/2, iconSize/2]
-    });
-
-    var marker = L.marker(loc.coords, { icon: customIcon });
-    
-    var popupContent = 
-      '<div class="popup-content">' +
-        '<h4>' + esc(name) + (isHome ? ' (Unterkunft)' : '') + '</h4>' +
-        '<p>Bezirk: ' + esc(loc.district) + '</p>' +
-        (usedInDays.length > 0 ? '<p style="color:#60a5fa; font-size:12px; margin-bottom:8px;">Geplant an: ' + esc(usedInDays.join(", ")) + '</p>' : '') +
-        '<div style="display:flex; gap:6px; margin-top:8px;">' +
-          '<a class="btn-naver" target="_blank" rel="noopener" href="' + naverUrl(name) + '">Naver Map ↗</a>' +
-          (!isHome ? '<button class="btn btn-sm" onclick="setAsHome(\'' + esc(name) + '\')">Als Unterkunft</button>' : '') +
-        '</div>' +
-      '</div>';
-
-    marker.bindPopup(popupContent);
-    markersLayer.addLayer(marker);
-    bounds.push(loc.coords);
-  });
-
-  if (bounds.length > 0 && home && LOCATIONS[home]) {
-    map.setView(LOCATIONS[home].coords, 12);
-  }
-}
-
-window.setAsHome = function(name) {
-  homeSelect.value = name;
-  save();
-  render();
-};
-
-document.getElementById("toggleMapBtn").onclick = function() {
-  var container = document.getElementById("mapContainer");
-  if (container.style.display === "none") {
-    container.style.display = "block";
-    this.textContent = "🗺️ Karte ausblenden";
-    setTimeout(function() {
-      initMap();
-      map.invalidateSize();
-    }, 150);
-  } else {
-    container.style.display = "none";
-    this.textContent = "🗺️ Karte anzeigen";
-  }
-};
-
-document.getElementById("closeMapBtn").onclick = function() {
-  document.getElementById("mapContainer").style.display = "none";
-  document.getElementById("toggleMapBtn").textContent = "🗺️ Karte anzeigen";
-};
-
-document.getElementById("centerHomeBtn").onclick = function() {
-  if (map && homeSelect.value && LOCATIONS[homeSelect.value]) {
-    map.flyTo(LOCATIONS[homeSelect.value].coords, 14);
-  }
-};
-
-// ==========================================
-// 6. RENDER DAYS
-// ==========================================
-function render() {
-  reassignDates();
-  var filterVal = document.getElementById("filter").value;
-  var out = document.getElementById("daysList");
-  out.innerHTML = "";
-
-  var filteredList = plan.map(function(day, originalIdx) {
-    return { day: day, originalIdx: originalIdx };
-  }).filter(function(item) {
-    if (filterVal === "all") return true;
-    if (filterVal === "fixed") return item.day.type === "fixed";
-    return item.day.type !== "fixed";
-  });
-
-  if (filteredList.length === 0) {
-    out.innerHTML = '<div class="empty-state">Keine Tage für diesen Filter gefunden.</div>';
-    return;
-  }
-
-  var slotLabels = [
-    { name: "Vormittag", icon: "🌅" },
-    { name: "Nachmittag", icon: "☀️" },
-    { name: "Abend", icon: "🌙" }
-  ];
-
-  filteredList.forEach(function(item) {
-    var d = item.day;
-    var idx = item.originalIdx;
-
-    var article = document.createElement("article");
-    article.className = "day";
-    article.dataset.index = idx;
-    article.draggable = true;
-
-    // Slots HTML
-    var slotsHtml = "";
-    for (var s = 0; s < 3; s++) {
-      var slot = d.slots[s];
-      var locName = slot.loc || "";
-      var dist = distanceLabel(locName);
-
-      var optionsHtml = '<option value="">-- Ort auswählen --</option>';
-      LOCATION_NAMES.forEach(function(name) {
-        optionsHtml += '<option value="' + esc(name) + '"' + (name === locName ? ' selected' : '') + '>' + esc(name) + '</option>';
-      });
-
-      var naverBtn = locName ? '<a class="btn-naver" target="_blank" rel="noopener" href="' + naverUrl(locName) + '">Naver ↗</a>' : '';
-      var distBadge = dist ? '<div class="distance-badge"><span>' + esc(dist.main) + '</span>' + (dist.sub ? '<span class="sub">' + esc(dist.sub) + '</span>' : '') + '</div>' : '';
-
-      slotsHtml += 
-        '<div class="slot">' +
-          '<div class="slot-header">' +
-            '<span class="slot-label">' + slotLabels[s].icon + ' ' + slotLabels[s].name + '</span>' +
-          '</div>' +
-          '<textarea placeholder="Aktivitäten für ' + slotLabels[s].name + ' eintragen ..." data-slot-idx="' + s + '">' + esc(slot.text || "") + '</textarea>' +
-          '<div class="locrow">' +
-            '<select data-loc-idx="' + s + '">' + optionsHtml + '</select>' +
-            naverBtn +
-          '</div>' +
-          distBadge +
-          '<div class="slot-actions">' +
-            '<div class="slot-shift-btns">' +
-              '<button class="btn btn-sm" data-slot-shift="up" data-slot="' + s + '" title="Nach oben verschieben">▲</button>' +
-              '<button class="btn btn-sm" data-slot-shift="down" data-slot="' + s + '" title="Nach unten verschieben">▼</button>' +
-            '</div>' +
-            '<button class="btn btn-sm btn-danger" data-slot-clear="' + s + '">Leeren</button>' +
-          '</div>' +
-        '</div>';
-    }
-
-    var isFirst = (idx === 0);
-    var isLast = (idx === plan.length - 1);
-
-    article.innerHTML = 
-      '<div class="day-head">' +
-        '<div class="day-title-wrap">' +
-          '<div class="drag-handle" title="Gedrückt halten & nach oben/unten ziehen">⋮⋮</div>' +
-          '<span class="day-index-badge">Tag ' + (idx + 1) + '</span>' +
-          '<div class="day-title-inputs">' +
-            '<div class="day-date-display">' + esc(d.date) + '</div>' +
-            '<input type="text" class="day-title-input" value="' + esc(d.title) + '" placeholder="Tagesüberschrift">' +
-          '</div>' +
-        '</div>' +
-        '<div class="day-head-meta">' +
-          '<div class="day-nav-btns">' +
-            '<button class="btn btn-sm" data-day-move="up" ' + (isFirst ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : '') + ' title="Tag 1 Position nach oben verschieben">▲ Vorheriger</button>' +
-            '<button class="btn btn-sm" data-day-move="down" ' + (isLast ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : '') + ' title="Tag 1 Position nach unten verschieben">▼ Nächster</button>' +
-          '</div>' +
-          '<span class="badge ' + (d.type === "fixed" ? "fixed" : "flex") + '" data-toggle-type="true" title="Klicken zum Umschalten zwischen Fix und Flex">' +
-            (d.type === "fixed" ? "🔒 Fixer Punkt" : "✨ Flexibel") +
-          '</span>' +
-          '<button class="btn btn-sm btn-danger" data-day-delete="true" title="Diesen Tag entfernen">✕</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="slots">' + slotsHtml + '</div>';
-
-    out.appendChild(article);
-  });
-
-  attachDragAndDrop();
-  updateStats();
-}
-
-// ==========================================
-// 7. DRAG & DROP REORDERING WITH AUTO-DATES
-// ==========================================
-var draggedElementIndex = null;
-
-function attachDragAndDrop() {
-  var dayElements = document.querySelectorAll(".day");
-  
-  dayElements.forEach(function(el) {
-    el.addEventListener("dragstart", function(e) {
-      draggedElementIndex = parseInt(el.dataset.index, 10);
-      el.classList.add("dragging");
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", draggedElementIndex);
-    });
-
-    el.addEventListener("dragend", function() {
-      el.classList.remove("dragging");
-      dayElements.forEach(function(d) { d.classList.remove("drag-over"); });
-    });
-
-    el.addEventListener("dragover", function(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      var targetIdx = parseInt(el.dataset.index, 10);
-      if (targetIdx !== draggedElementIndex) {
-        el.classList.add("drag-over");
-      }
-    });
-
-    el.addEventListener("dragleave", function() {
-      el.classList.remove("drag-over");
-    });
-
-    el.addEventListener("drop", function(e) {
-      e.preventDefault();
-      el.classList.remove("drag-over");
-      var targetIndex = parseInt(el.dataset.index, 10);
-      if (draggedElementIndex === null || draggedElementIndex === targetIndex) return;
-
-      // Move element in plan array
-      var movedDay = plan.splice(draggedElementIndex, 1)[0];
-      plan.splice(targetIndex, 0, movedDay);
-
-      // Reassign all calendar dates automatically
-      reassignDates();
-      save();
-      render();
-    });
-  });
-}
-
-// Move day by 1 step up or down
-function moveDay(fromIndex, toIndex) {
-  if (toIndex < 0 || toIndex >= plan.length || fromIndex === toIndex) return;
-  var moved = plan.splice(fromIndex, 1)[0];
-  plan.splice(toIndex, 0, moved);
-  reassignDates();
-  save();
-  render();
-}
-
-// ==========================================
-// 8. EVENT LISTENERS
-// ==========================================
-document.getElementById("daysList").addEventListener("input", function(e) {
-  var dayCard = e.target.closest(".day");
-  if (!dayCard) return;
-  var dayIdx = parseInt(dayCard.dataset.index, 10);
-  var day = plan[dayIdx];
-  if (!day) return;
-
-  if (e.target.classList.contains("day-title-input")) {
-    day.title = e.target.value;
-    save();
-  } else if (e.target.dataset.slotIdx !== undefined) {
-    var slotIdx = parseInt(e.target.dataset.slotIdx, 10);
-    day.slots[slotIdx].text = e.target.value;
-    save();
-  }
-});
-
-document.getElementById("daysList").addEventListener("change", function(e) {
-  var dayCard = e.target.closest(".day");
-  if (!dayCard) return;
-  var dayIdx = parseInt(dayCard.dataset.index, 10);
-  var day = plan[dayIdx];
-  if (!day) return;
-
-  if (e.target.dataset.locIdx !== undefined) {
-    var slotIdx = parseInt(e.target.dataset.locIdx, 10);
-    day.slots[slotIdx].loc = e.target.value;
-    render();
-    save();
-  }
-});
-
-document.getElementById("daysList").addEventListener("click", function(e) {
-  var target = e.target;
-  if (target.tagName === "A") return;
-
-  var dayCard = target.closest(".day");
-  if (!dayCard) return;
-  var dayIdx = parseInt(dayCard.dataset.index, 10);
-  var day = plan[dayIdx];
-  if (!day) return;
-
-  // Day move up/down
-  var moveBtn = target.closest("[data-day-move]");
-  if (moveBtn) {
-    var direction = moveBtn.dataset.dayMove;
-    if (direction === "up") moveDay(dayIdx, dayIdx - 1);
-    else if (direction === "down") moveDay(dayIdx, dayIdx + 1);
-    return;
-  }
-
-  // Toggle type (fixed / flex)
-  var typeBadge = target.closest("[data-toggle-type]");
-  if (typeBadge) {
-    day.type = (day.type === "fixed" ? "flex" : "fixed");
-    render();
-    save();
-    return;
-  }
-
-  // Delete day
-  var delBtn = target.closest("[data-day-delete]");
-  if (delBtn) {
-    if (confirm("Möchtest du Tag " + (dayIdx + 1) + " (" + day.title + ") wirklich löschen?")) {
-      plan.splice(dayIdx, 1);
-      reassignDates();
-      save();
-      render();
-    }
-    return;
-  }
-
-  // Clear slot
-  var clearBtn = target.closest("[data-slot-clear]");
-  if (clearBtn) {
-    var sIdx = parseInt(clearBtn.dataset.slotClear, 10);
-    day.slots[sIdx].text = "";
-    day.slots[sIdx].loc = "";
-    render();
-    save();
-    return;
-  }
-
-  // Shift slot within day
-  var shiftBtn = target.closest("[data-slot-shift]");
-  if (shiftBtn) {
-    var sIdx = parseInt(shiftBtn.dataset.slot, 10);
-    var targetSIdx = shiftBtn.dataset.slotShift === "up" ? Math.max(0, sIdx - 1) : Math.min(2, sIdx + 1);
-    var temp = day.slots[sIdx];
-    day.slots[sIdx] = day.slots[targetSIdx];
-    day.slots[targetSIdx] = temp;
-    render();
-    save();
-    return;
-  }
-});
-
-// Home selection change
-homeSelect.onchange = function() {
-  save();
-  render();
-};
-
-// Filter change
-document.getElementById("filter").onchange = render;
-
-// Notes input
-notesEl.oninput = save;
-
-// Reset button
-document.getElementById("resetBtn").onclick = function() {
-  if (confirm("Gesamten Plan wirklich auf die Standard-Reiseroute zurücksetzen?")) {
-    plan = clone(DEFAULT_PLAN);
-    reassignDates();
-    save();
-    render();
-  }
-};
-
-// Add day
-document.getElementById("addDayBtn").onclick = function() {
-  var nextDayOffset = plan.length;
-  var newId = plan.reduce(function(max, d) { return Math.max(max, d.id || 0); }, 0) + 1;
-  plan.push({
-    id: newId,
-    title: "Neuer Ausflug / Freier Tag",
-    type: "flex",
-    slots: [
-      { text: "", loc: "" },
-      { text: "", loc: "" },
-      { text: "", loc: "" }
-    ]
-  });
-  reassignDates();
-  save();
-  render();
-  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-};
-
-// Update stats
-function updateStats() {
-  document.getElementById("dayCount").textContent = plan.length;
-  document.getElementById("fixedCount").textContent = plan.filter(function(d) { return d.type === "fixed"; }).length;
-  var total = plan.length * 3;
-  var filled = plan.reduce(function(sum, d) {
-    return sum + d.slots.filter(function(s) { return s.text && s.text.trim().length > 0; }).length;
-  }, 0);
-  document.getElementById("filledCount").textContent = filled;
-  document.getElementById("progress").textContent = total ? Math.round((filled / total) * 100) + "%" : "0%";
-}
-
-// Initial render
-render();
-updateStats();
-</script>
-</body>
-</html>
+/* ===== Konstanten & Helfer ===== */
+const KEY='seoultrip2026.v2',LEG='seoultrip2026.legacy-backup',SECS=[['am','Vormittag'],['pm','Nachmittag'],['ev','Abend']];
+const $=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const naver=q=>'https://map.naver.com/p/search/'+encodeURIComponent(q);
+const MIN=t=>{const m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?+m[1]*60+ +m[2]:null};
+const fmtD=iso=>iso?iso.split('-').reverse().join('.'):'';
+const wd=iso=>iso?new Date(iso+'T12:00:00').toLocaleDateString('de-CH',{weekday:'long'}):'';
+const fmtTs=t=>t?new Date(t).toLocaleString('de-CH',{dateStyle:'short',timeStyle:'short'}):'noch nie';
+let S,tt;
+function toast(m,err){const t=$('#toast');t.textContent=m;t.className='on'+(err?' err':'');clearTimeout(tt);tt=setTimeout(()=>t.className='',2200)}
+
+/* ===== Standardplan (aus deiner Tagesplanung) ===== */
+function A(sec,title,place,start,end,note,fix,tt){return{id:uid(),sec,title,place:place||'',start:start||'',end:end||'',timeText:tt||'',note:note||'',fix:!!fix,naver:''}}
+function D(date,title,status,acts,note,todo){return{id:uid(),date,title,status,note:note||'',todo:todo||'',acts}}
+function seed(){const O='offen';return{app:'seoultrip-2026',version:2,
+settings:{view:'all',persons:3,period:'5.–15. Oktober 2026',lodging:'16-5 Sungmun 5-gil, Seoul 04137'},meta:{lastExport:null,lastImport:null},days:[
+D('2026-10-05','Ankunftstag','flex',[A('am','Ankommen, Einreise, Gepäck und Fahrt zur Unterkunft','Noch offen','','','Ankunft rund um Mittag/Nachmittag',0,O),A('pm','Check-in und Pause (optional Yeonnam-dong)','Nahe Unterkunft','','','Eigenes Programm',0,O),A('ev','Palast bei Nacht','Gyeongbokgung Palace','','','',0,O)],'','Tickets Palast kaufen'),
+D('2026-10-06','Seongsu','flex',[A('am','Foodmarket','','10:00','12:00'),A('pm','Genc Schule','Online','13:00','14:00'),A('pm','International Garden Show','Seongsu','14:00','17:00'),A('pm','Seongsu Café – Ort anschauen','Seongsu','17:00','19:00'),A('ev','Koreanisches BBQ (Jongno oder Euljiro); Clubnacht Hongdae, Geburtstag Mexicaner und Italo','Hongdae','19:00','04:00')]),
+D('2026-10-07','Suwon Tagestrip (Baseball Suwoncampus)','fix',[A('am','Fitness','Changdeokgung Palace','10:00','12:00','Ort aus bisherigem Plan übernommen'),A('pm','Fahrt nach Suwon','Suwon','12:45','14:30','Genc muss für Visa-Karte Fingerprint im Campus machen',1),A('pm','Suwon Palast, Mauer besichtigen','Suwon','14:30','17:00'),A('ev','Baseballspiel','Suwon Baseball Stadium','17:30','21:00','Zeit prüfen',1),A('ev','Rückfahrt, Ausgang Euljiro gemütlich','Euljiro','22:00','01:00')],'Es werden noch andere Studenten dabei sein; der Koreaner bucht im Voraus.'),
+D('2026-10-08','DMZ-Tour (geführte Tour mit Überläufer)','fix',[A('am','Früher Start; Frühstück zum Mitnehmen; organisierte DMZ-Tour','DMZ Imjingak','08:00','17:00','Originalpass mitnehmen!',1),A('pm','Fortsetzung der DMZ-Tour; Rückkehr nach Seoul am späten Nachmittag','DMZ Imjingak','','','',1,'bis 17:00/18:00'),A('ev','Han River Abend chillen mit Studifreunden (Buddyprogramm), falls Lust; Fahrrad am Han River','Itaewon','','','',0,O),A('ev','Itaewon Ausgang','Itaewon','','04:00','',0,'bis 04:00')]),
+D('2026-10-09','Namsan, Shopping und Nachtleben','flex',[A('am','Fitness','Namsan Seoul Tower','11:00','12:30'),A('pm','Myeongdong Shopping; Namdaemun Market','Myeongdong','13:00','18:00'),A('ev','Drohnenshow!','Ttukseom Hangang Park','20:30','21:00','Zeit prüfen',1),A('ev','Ausgang Gangnam oder Itaewon','Gangnam','','','',0,'flexibel')],'Ausgang kann noch ändern'),
+D('2026-10-10','FC Seoul gegen Jeju SK','fix',[A('am','Frühstück; Mangwon oder Han River; frühes Mittagessen','Mangwon Market','','','',0,O),A('pm','Zum Seoul World Cup Stadium; Spiel ab ca. 14:00 Uhr','Seoul World Cup Stadium','13:00','18:00','Anpfiff prüfen',1),A('ev','MMA Fight Night at DOMVS','Gangnam','20:00','00:00','',1),A('ev','Ausgang Gangnam/Apujeong','Apgujeong','','','',0,'nach Bedarf')]),
+D('2026-10-11','Mountain','flex',[A('am','Bukhansan Mountain','Bukhansan','','','',0,O),A('ev','Ddoo ddoo car free Jamsugyo Festival','Jamsugyo','','','',0,O)]),
+D('2026-10-12','Nami Island','flex',[A('am','Spätes Frühstück; Seoul Forest Spaziergang','Seoul Forest','','','',0,O),A('pm','Seongsu: Cafés, Concept Stores, Pop-ups und Streetwear','Seongsu-dong','','','',0,O),A('ev','Gangnam oder Hannam; Rooftop-Bar; optional Clubnacht','Gangnam','','','',0,O)]),
+D('2026-10-13','Nami Island','flex',[A('am','OPTION B: früher Start nach Nami Island','Nami Island','','','',0,O),A('pm','Incheon: Jayu Park und Open Port – oder Nami Island und Garden of Morning Calm','Nami Island','','','',0,O),A('ev','Rückkehr; Abendessen und Bar oder Erholung','Itaewon','','','',0,O)]),
+D('2026-10-14','Letzter Seoul-Tag','flex',[A('am','Lieblingsort oder offene Sehenswürdigkeit nachholen','','','','',0,O),A('pm','Letzte Einkäufe; Gepäck organisieren; Pause','Myeongdong','','','',0,O),A('ev','Abschlussessen; Rooftop-Bar und letzter Spaziergang am Han River','Han River Banpo','','','',0,O)]),
+D('2026-10-15','Abreise','fix',[A('am','Frühstück; Check-out; Gepäck und Flughafentransfer je nach Flugzeit','','','','Abflug rund um Mittag/Nachmittag',1,O),A('pm','Flughafen und Check-in','','','','',1,O),A('ev','Rückflug nach Hause','','','','',1,O)])]}}
+
+const FOOD=[['Gegrillte Innereien (Gopchang) – Gangnam Gop','곱창구이',1,0,'Je nach Würzung/Dip leicht scharf. Nur wenn man Innereien mag.','https://www.tripadvisor.com/Restaurant_Review-g294197-d14969098-Reviews-Gangnam_Gop-Seoul.html'],
+['Schweinebauch (Samgyeopsal) – Yook Tong Ryeong','삼겹살',0,1,'Nicht scharf. Gemeinsam essen.',''],
+['Hanwoo-Rind – Gabojeong','한우구이',0,1,'Nicht scharf. 20 Beilagen, Holzkohle, ca. 30 Min. mit dem Bus ab Zentrum; Alternative zu Schweinebauch.',''],
+['Kartoffelknochen-Eintopf (Gamja-tang)','감자탕',2,0,'Meist scharf; gut gegen Kater. 245 Donggyo-ro, Mapo-gu, Seoul','https://www.songganegamjatang.com'],
+['Korean Fried Chicken','치킨',1,1,'BBQ: 양념반황올반 + 생맥 (Zapfbier) zeigen. Kyochon: Honey Combo oder 양념반간장반 (halb scharf-süss, halb Soja). Yangnyeom = süss-scharf, Soja = nicht scharf.',''],
+['Sojasaucen-Krabbe (Ganjang-gejang) – Jinmi Sikdang','간장게장',0,1,'Nicht scharf, roher Fisch/Krabbe. Michelin; Reservation nötig.','https://guide.michelin.com/kr/ko/seoul-capital-area/kr-seoul/restaurant/jinmi-sikdang'],
+['Schweinefüsse (Jokbal)','족발',0,0,'Meist mild (scharfe Variante: 불족발). In Ssam-Blättern mit Gemüse.','https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=59895'],
+['Gegrillter Schlammaal (Jangeo-gui) – Yeongdong Jang-eo','장어구이',0,0,'Meist nicht scharf; auf Augenhöhe mit Schweinebauch.','https://seoulshopper.com/blogs/restaurants/yeongdong-jang-eo-grilled-eel']];
+
+/* ===== Speichern, Laden, Migration ===== */
+function save(msg){try{localStorage.setItem(KEY,JSON.stringify(S));toast(msg||'Gespeichert ✓')}catch(e){toast('Speichern fehlgeschlagen (Speicher voll/gesperrt). Bitte Export machen.',1)}}
+function norm(o){ // Validierung + Migration auf Format v2
+ if(!o||typeof o!=='object'||!Array.isArray(o.days))throw new Error('Keine gültige Reiseplan-Datei (Feld "days" fehlt).');
+ const days=o.days.map(d=>({id:d.id||uid(),date:d.date||'',title:d.title||d.name||'',status:d.status==='fix'?'fix':'flex',note:d.note||d.notes||'',todo:d.todo||'',
+  acts:(Array.isArray(d.acts)?d.acts:Array.isArray(d.activities)?d.activities:[]).map(a=>({id:a.id||uid(),sec:['am','pm','ev'].includes(a.sec)?a.sec:'am',title:a.title||'',place:a.place||'',start:a.start||'',end:a.end||'',timeText:a.timeText||'',note:a.note||'',fix:!!a.fix,naver:a.naver||''}))}));
+ const b=seed();return{app:'seoultrip-2026',version:2,settings:Object.assign(b.settings,o.settings||{}),meta:Object.assign({lastExport:null,lastImport:null},o.meta||{}),days}}
+function load(){
+ try{const r=localStorage.getItem(KEY);if(r){S=norm(JSON.parse(r));return}}catch(e){}
+ // Erststart: alte Browserdaten (falls vorhanden) als Backup sichern, nichts geht verloren
+ try{const old={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k!==KEY&&k!==LEG&&/seoul|trip|reise/i.test(k))old[k]=localStorage.getItem(k)}
+  if(Object.keys(old).length&&!localStorage.getItem(LEG))localStorage.setItem(LEG,JSON.stringify(old))}catch(e){}
+ S=seed();save('Standardplan geladen ✓')}
+
+/* ===== Zeitfenster, Überschneidung, Zusammenfassung ===== */
+function win(a){const s=MIN(a.start);let e=MIN(a.end);if(s==null||e==null)return null;if(e<=s)e+=1440;return[s,e]}
+function overlaps(d){const o=new Set(),w=d.acts.map(a=>[a,win(a)]).filter(x=>x[1]);for(let i=0;i<w.length;i++)for(let j=i+1;j<w.length;j++){const x=w[i][1],y=w[j][1];if(x[0]<y[1]&&y[0]<x[1]){o.add(w[i][0].id);o.add(w[j][0].id)}}return o}
+function label(a){if(a.start&&a.end)return a.start+'–'+a.end;if(a.start)return'ab '+a.start;if(a.end)return'bis '+a.end;return a.timeText||'flexibel'}
+function summary(d){let f=null,l=null;d.acts.forEach(a=>{const s=MIN(a.start),w=win(a);if(s!=null&&(!f||s<f.m))f={m:s,t:a.start};const lm=w?w[1]:s,lt=w?a.end:a.start;if(lm!=null&&(!l||lm>l.m))l={m:lm,t:lt}});
+ return{n:d.acts.length,f:f&&f.t,l:l&&l.t,fix:d.acts.filter(a=>a.fix).length,flex:d.acts.filter(a=>!a.fix).length}}
+
+/* ===== Rendering ===== */
+function actHTML(d,a,ov){const link=a.naver||(a.place&&a.place!=='Noch offen'?naver(a.place):(a.title?naver(a.title):''));
+ return`<div class="act${ov.has(a.id)?' warn':''}" draggable="true" data-aid="${a.id}" data-did="${d.id}"><div class="at"><span class="time">${esc(label(a))}</span><span class="atit">${esc(a.title||'(ohne Titel)')}</span><span class="pill ${a.fix?'fix':'flex'}">${a.fix?'Fix':'Flex'}</span>${ov.has(a.id)?'<span class="pill" style="color:var(--wa)">⚠ Überschneidung</span>':''}</div>${a.place?`<div class="pl">📍 ${esc(a.place)}</div>`:''}${a.note?`<div class="nt">${esc(a.note)}</div>`:''}
+<div class="tools"><button data-a="up" data-d="${d.id}" data-i="${a.id}" title="Nach oben">↑</button><button data-a="down" data-d="${d.id}" data-i="${a.id}" title="Nach unten">↓</button><button data-a="edit" data-d="${d.id}" data-i="${a.id}">✎ Bearbeiten</button><button class="dan" data-a="del" data-d="${d.id}" data-i="${a.id}">🗑</button>${link?`<a class="btn" href="${esc(link)}" target="_blank" rel="noopener">🗺 Naver Map</a>`:''}</div></div>`}
+function dayHTML(d,idx){const ov=overlaps(d),s=summary(d);
+ const secs=SECS.map(([k,n])=>`<div class="sec"><div class="sh"><b>${n}</b><button class="pri" data-a="add" data-d="${d.id}" data-s="${k}">+ Aktivität hinzufügen</button></div><div class="list" data-did="${d.id}" data-sec="${k}">${d.acts.filter(a=>a.sec===k).map(a=>actHTML(d,a,ov)).join('')||'<div class="sub">Noch nichts geplant – hierher ziehen oder hinzufügen.</div>'}</div></div>`).join('');
+ return`<section class="day"><div class="dh"><div><div class="dn">Tag ${idx+1} · ${d.status==='fix'?'FIX':'FLEX'}</div><div class="dd">${esc(wd(d.date))}, ${esc(fmtD(d.date))}</div><h2>${esc(d.title||'Ohne Titel')}</h2></div><button data-a="editday" data-d="${d.id}">✎ Tag</button></div>
+<div class="sum"><span class="pill">${s.n} Aktivitäten</span><span class="pill">Start ${s.f||'–'}</span><span class="pill">Ende ${s.l||'–'}</span><span class="pill fix">${s.fix} Fix</span><span class="pill flex">${s.flex} Flex</span></div>
+${ov.size?'<div class="wr">⚠ Zeitfenster überschneiden sich an diesem Tag (Planung bleibt trotzdem möglich).</div>':''}${secs}
+<label>Tagesnotiz</label><textarea data-f="note" data-d="${d.id}" placeholder="Notizen, streichen, unbedingt machen …">${esc(d.note)}</textarea><label>Offene Punkte / Tickets / Reservationen</label><textarea data-f="todo" data-d="${d.id}">${esc(d.todo)}</textarea></section>`}
+function render(){const v=S.settings.view;if(v!=='all'&&!S.days.some(d=>d.id===v))S.settings.view='all';const vv=S.settings.view;
+ $('#hdr').textContent=`${S.settings.period} · ${S.settings.persons} Personen · 🏠 ${S.settings.lodging}`;
+ $('#chips').innerHTML=`<button class="chip${vv==='all'?' on':''}" data-a="view" data-d="all">Alle</button>`+S.days.map((d,i)=>`<button class="chip${vv===d.id?' on':''}" data-a="view" data-d="${d.id}">T${i+1} · ${esc(fmtD(d.date).slice(0,5))}</button>`).join('');
+ $('#days').innerHTML=S.days.map((d,i)=>[d,i]).filter(x=>vv==='all'||x[0].id===vv).map(x=>dayHTML(x[0],x[1])).join('')||'<div class="card">Keine Tage. Mit „+ Tag“ starten.</div>';
+ $('#dstat').textContent=`Zuletzt exportiert: ${fmtTs(S.meta.lastExport)} · Zuletzt importiert: ${fmtTs(S.meta.lastImport)}`;
+ $('#food').innerHTML=FOOD.map(f=>`<div class="food"><b>${f[3]?'♥ ':''}${esc(f[0])}</b><br>${esc(f[1])} · ${'🌶'.repeat(f[2])||'nicht scharf'}${f[2]?' ('+['','mild','scharf'][f[2]]+')':''}<div class="pl">${esc(f[4])}</div>${f[5]?`<a href="${esc(f[5])}" target="_blank" rel="noopener">Link</a>`:''}</div>`).join('');
+ $('#legBtn').classList.toggle('hidden',!localStorage.getItem(LEG));$('#shareBtn').classList.toggle('hidden',!(navigator.canShare&&navigator.share))}
+
+/* ===== Sheets (Formulare) ===== */
+function sheet(h){$('#sheet').innerHTML=h;$('#ov').classList.remove('hidden')}
+function closeSheet(){$('#ov').classList.add('hidden')}
+function ask(msg,ok,cb,danger){sheet(`<h3>Bestätigen</h3><p>${msg}</p><div class="row"><button class="${danger?'dan':'pri'}" id="yes">${ok}</button><button data-a="close">Abbrechen</button></div>`);$('#yes').onclick=()=>{closeSheet();cb()}}
+const dayById=id=>S.days.find(d=>d.id===id);
+function actForm(did,aid,sec){const d=dayById(did),a=aid?d.acts.find(x=>x.id===aid):{sec,fix:false,title:'',place:'',start:'',end:'',timeText:'',note:'',naver:''};
+ sheet(`<h3>${aid?'Aktivität bearbeiten':'Neue Aktivität'}</h3><form id="f" data-k="act" data-d="${did}" data-i="${aid||''}"><label>Titel *</label><input name="title" required value="${esc(a.title)}"><label>Ort</label><input name="place" value="${esc(a.place)}"><div class="g2"><div><label>Startzeit</label><input type="time" name="start" value="${esc(a.start)}"></div><div><label>Endzeit</label><input type="time" name="end" value="${esc(a.end)}"></div></div><div class="g2"><div><label>oder Dauer (Min.)</label><input type="number" name="dur" min="5" step="5" inputmode="numeric"></div><div><label>Ohne Uhrzeit</label><input name="timeText" placeholder="flexibel / nach Bedarf" value="${esc(a.timeText)}"></div></div><div class="g2"><div><label>Abschnitt</label><select name="sec">${SECS.map(s=>`<option value="${s[0]}"${a.sec===s[0]?' selected':''}>${s[1]}</option>`).join('')}</select></div><div><label>Status</label><select name="fix"><option value="0"${a.fix?'':' selected'}>Flex</option><option value="1"${a.fix?' selected':''}>Fix</option></select></div></div><label>Beschreibung / Notiz</label><textarea name="note">${esc(a.note)}</textarea><label>Naver-Map-Link (optional, sonst automatisch aus Ort)</label><input name="naver" type="url" placeholder="https://naver.me/…" value="${esc(a.naver)}"><div class="row" style="margin-top:14px"><button class="pri" type="submit">Speichern</button><button type="button" data-a="close">Abbrechen</button></div></form>`)}
+function dayForm(did){const d=did?dayById(did):{date:S.days.length?new Date(new Date(S.days[S.days.length-1].date+'T12:00:00').getTime()+864e5).toISOString().slice(0,10):'',title:'',status:'flex'};
+ sheet(`<h3>${did?'Tag bearbeiten':'Neuer Tag'}</h3><form id="f" data-k="day" data-d="${did||''}"><label>Tagesname</label><input name="title" value="${esc(d.title)}"><label>Datum</label><input type="date" name="date" required value="${esc(d.date)}"><label>Status</label><select name="status"><option value="flex"${d.status==='flex'?' selected':''}>Flex</option><option value="fix"${d.status==='fix'?' selected':''}>Fix</option></select><div class="row" style="margin-top:14px"><button class="pri" type="submit">Speichern</button>${did?'<button type="button" class="dan" data-a="delday" data-d="'+did+'">Tag löschen</button>':''}<button type="button" data-a="close">Abbrechen</button></div></form>`)}
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target,k=f.dataset.k,v=Object.fromEntries(new FormData(f));
+ if(k==='act'){const d=dayById(f.dataset.d);let a=f.dataset.i&&d.acts.find(x=>x.id===f.dataset.i);const isNew=!a;if(isNew){a={id:uid()};}
+  if(v.dur&&v.start&&!v.end){const m=MIN(v.start)+ +v.dur;v.end=String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+  Object.assign(a,{title:v.title.trim(),place:v.place.trim(),start:v.start,end:v.end,timeText:v.timeText.trim(),note:v.note,fix:v.fix==='1',naver:v.naver.trim(),sec:v.sec});
+  if(isNew)d.acts.push(a);regroup(d)}
+ else{let d=f.dataset.d&&dayById(f.dataset.d);if(!d){d={id:uid(),note:'',todo:'',acts:[]};S.days.push(d)}Object.assign(d,{title:v.title.trim(),date:v.date,status:v.status});S.days.sort((x,y)=>x.date.localeCompare(y.date));if(!f.dataset.d)S.settings.view=d.id}
+ closeSheet();save();render()});
+function regroup(d){d.acts=[].concat(...SECS.map(s=>d.acts.filter(a=>a.sec===s[0])))}
+/* Sortieren: Auf/Ab, über Abschnittsgrenzen hinweg */
+function moveAct(d,id,dir){const K=['am','pm','ev'],g={am:[],pm:[],ev:[]};d.acts.forEach(a=>g[a.sec].push(a));const a=d.acts.find(x=>x.id===id),k=K.indexOf(a.sec),L=g[a.sec],i=L.indexOf(a),j=i+dir;
+ if(j>=0&&j<L.length){L[i]=L[j];L[j]=a}else{const nk=k+dir;if(nk<0||nk>2)return;L.splice(i,1);a.sec=K[nk];dir<0?g[K[nk]].push(a):g[K[nk]].unshift(a)}
+ d.acts=[...g.am,...g.pm,...g.ev];save();render()}
+function dropAct(did,aid,sec,before){const d=dayById(did),a=d.acts.find(x=>x.id===aid);if(!a||aid===before)return;d.acts=d.acts.filter(x=>x!==a);a.sec=sec;const i=before?d.acts.findIndex(x=>x.id===before):-1;if(i>=0)d.acts.splice(i,0,a);else{const last=d.acts.map(x=>x.sec).lastIndexOf(sec);d.acts.splice(last+1,0,a)}regroup(d);save();render()}
+
+/* ===== Export / Import ===== */
+function payload(){return{app:'seoultrip-2026',version:2,exportedAt:new Date().toISOString(),settings:S.settings,meta:S.meta,days:S.days}}
+function dl(name,text,mime){const b=new Blob([text],{type:mime}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500)}
+const stamp=()=>new Date().toISOString().slice(0,10);
+function stampExport(){S.meta.lastExport=Date.now();save('Exportiert & gespeichert ✓');render()}
+function toText(){let t=`SEOUL 2026 – ${S.settings.period}\nUnterkunft: ${S.settings.lodging}\n\n`;S.days.forEach((d,i)=>{t+=`TAG ${i+1} – ${wd(d.date)}, ${fmtD(d.date)} – ${d.title} [${d.status.toUpperCase()}]\n`;SECS.forEach(([k,n])=>{const L=d.acts.filter(a=>a.sec===k);if(L.length){t+=`  ${n}\n`;L.forEach(a=>t+=`   - ${label(a)}  ${a.title}${a.place?' @ '+a.place:''} [${a.fix?'Fix':'Flex'}]${a.note?' – '+a.note.replace(/\n/g,' '):''}\n`)}});if(d.note)t+=`  Notiz: ${d.note}\n`;if(d.todo)t+=`  Offen: ${d.todo}\n`;t+='\n'});return t}
+function toCSV(){const q=s=>'"'+String(s||'').replace(/"/g,'""')+'"',r=[['Tag','Datum','Wochentag','Tagesname','Abschnitt','Von','Bis','Zeitangabe','Titel','Ort','Fix/Flex','Notiz','Naver']];S.days.forEach((d,i)=>d.acts.forEach(a=>r.push([i+1,fmtD(d.date),wd(d.date),d.title,SECS.find(s=>s[0]===a.sec)[1],a.start,a.end,label(a),a.title,a.place,a.fix?'Fix':'Flex',a.note,a.naver])));return'\ufeff'+r.map(x=>x.map(q).join(';')).join('\r\n')}
+function doImport(file){const r=new FileReader();r.onerror=()=>toast('Datei konnte nicht gelesen werden.',1);r.onload=()=>{let n;try{n=norm(JSON.parse(r.result))}catch(e){toast('Import fehlgeschlagen: '+(e.message.startsWith('Keine')?e.message:'Die Datei ist kein gültiges JSON.'),1);return}
+ const acts=n.days.reduce((s,d)=>s+d.acts.length,0);
+ ask(`Import: <b>${n.days.length} Tage</b>, <b>${acts} Aktivitäten</b>.<br>Dein aktueller Plan (${S.days.length} Tage, ${S.days.reduce((s,d)=>s+d.acts.length,0)} Aktivitäten) wird <b>überschrieben</b>. Ein Sicherheits-Backup bleibt im Browser erhalten.`,'Ja, überschreiben',()=>{try{localStorage.setItem('seoultrip2026.pre-import',JSON.stringify(S))}catch(e){}n.meta.lastImport=Date.now();n.meta.lastExport=S.meta.lastExport;S=n;save('Importiert & gespeichert ✓');render()},1)};r.readAsText(file)}
+
+/* ===== Events ===== */
+document.addEventListener('click',e=>{if(e.target.id==='ov')return closeSheet();const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,d=b.dataset.d,i=b.dataset.i,s=b.dataset.s,ids=S.days.map(x=>x.id);
+ const setView=v=>{S.settings.view=v;save();render();window.scrollTo(0,0)};
+ switch(a){case'close':closeSheet();break;case'vall':setView('all');break;case'vone':setView(S.settings.view!=='all'?S.settings.view:(ids[0]||'all'));break;case'view':setView(d);break;
+ case'prev':case'next':{const c=ids.indexOf(S.settings.view),n=a==='next'?c+1:c-1;if(n<0)setView('all');else if(n<ids.length)setView(ids[n]);break}
+ case'add':actForm(d,null,s);break;case'edit':actForm(d,i);break;case'up':moveAct(dayById(d),i,-1);break;case'down':moveAct(dayById(d),i,1);break;
+ case'del':ask('Diese Aktivität löschen?','Löschen',()=>{const x=dayById(d);x.acts=x.acts.filter(y=>y.id!==i);save('Gelöscht & gespeichert ✓');render()},1);break;
+ case'addday':dayForm();break;case'editday':dayForm(d);break;
+ case'delday':ask('Diesen Tag mit allen Aktivitäten löschen?','Tag löschen',()=>{S.days=S.days.filter(y=>y.id!==d);save('Tag gelöscht ✓');render()},1);break;
+ case'expjson':{const p=payload();dl(`seoul-reiseplan-${stamp()}.json`,JSON.stringify(p,null,2),'application/json');stampExport();break}
+ case'exptxt':dl(`seoul-reiseplan-${stamp()}.txt`,toText(),'text/plain');stampExport();break;
+ case'expcsv':dl(`seoul-reiseplan-${stamp()}.csv`,toCSV(),'text/csv');stampExport();break;
+ case'share':{const f=new File([JSON.stringify(payload(),null,2)],`seoul-reiseplan-${stamp()}.json`,{type:'application/json'});navigator.share({files:[f],title:'Seoul Reiseplan'}).then(stampExport).catch(()=>{});break}
+ case'imp':$('#file').click();break;
+ case'legacy':{const o=localStorage.getItem(LEG);dl('seoul-alter-browserstand.json',o,'application/json');break}
+ case'reset':ask('Auf den Standardplan zurücksetzen? Aktueller Plan wird überschrieben (Backup im Browser).','Zurücksetzen',()=>{try{localStorage.setItem('seoultrip2026.pre-import',JSON.stringify(S))}catch(x){}const m=S.meta;S=seed();S.meta=m;save('Zurückgesetzt ✓');render()},1);break}});
+$('#file').addEventListener('change',e=>{if(e.target.files[0])doImport(e.target.files[0]);e.target.value=''});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.f){dayById(t.dataset.d)[t.dataset.f]=t.value;clearTimeout(window._sv);window._sv=setTimeout(()=>save(),500)}
+ if(t.form&&t.form.id==='f'&&(t.name==='dur'||t.name==='start')){const f=t.form,s=MIN(f.start.value),du=+f.dur.value;if(s!=null&&du>0){const m=s+du;f.end.value=String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}}});
+/* Drag & Drop (Desktop); auf dem Handy: Auf/Ab-Buttons */
+let drag=null;
+document.addEventListener('dragstart',e=>{const c=e.target.closest&&e.target.closest('.act');if(c){drag={d:c.dataset.did,a:c.dataset.aid};c.classList.add('drag');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',drag.a)}});
+document.addEventListener('dragend',()=>{drag=null;render()});
+document.addEventListener('dragover',e=>{const l=e.target.closest&&e.target.closest('.list');if(l&&drag&&l.dataset.did===drag.d){e.preventDefault();l.classList.add('over')}});
+document.addEventListener('dragleave',e=>{const l=e.target.closest&&e.target.closest('.list');if(l)l.classList.remove('over')});
+document.addEventListener('drop',e=>{const l=e.target.closest&&e.target.closest('.list');if(!l||!drag||l.dataset.did!==drag.d)return;e.preventDefault();const c=e.target.closest('.act');dropAct(drag.d,drag.a,l.dataset.sec,c?c.dataset.aid:null)});
+load();render();
+</script></body></html>
